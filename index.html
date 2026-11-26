@@ -1,0 +1,1255 @@
+<!doctype html>
+<html lang="de"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>TrainingHub</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TrainingHub">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%2790%27 font-size=%2790%27%3E%F0%9F%8F%88%3C/text%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #000; --text: #e8f1ec; --muted: #8fa79a;
+  --accent: #a78bfa; --accent-soft: rgba(167, 139, 250, .16);
+  --glass: rgba(255, 255, 255, .06); --glass-border: rgba(255, 255, 255, .12);
+  --radius: 22px; --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body, #root { min-height: 100%; }
+body {
+  font-family: var(--font); color: var(--text); background: var(--bg);
+  background-image:
+    radial-gradient(60vw 50vh at 85% -10%, rgba(167,139,250,.08), transparent 70%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.glass {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 10px 40px rgba(0,0,0,.35);
+}
+
+.shell { display: flex; min-height: 100%; gap: 20px; padding: 20px; }
+.nav { width: 210px; flex-shrink: 0; border-radius: var(--radius); padding: 18px 12px; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 20px; align-self: flex-start; }
+.brand { font-weight: 700; font-size: 1.15rem; letter-spacing: -.02em; padding: 4px 12px 16px; color: var(--accent); }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 14px; color: var(--muted); transition: background .2s, color .2s; text-align: left; }
+.nav-item:hover { background: rgba(255,255,255,.06); color: var(--text); }
+.nav-item.active { background: var(--accent-soft); color: var(--accent); box-shadow: inset 0 0 0 1px rgba(167,139,250,.3); }
+.nav-icon { width: 20px; text-align: center; }
+
+.main { flex: 1; min-width: 0; animation: enter .45s cubic-bezier(.2,.7,.2,1); }
+@keyframes enter { from { opacity: 0; transform: translateY(10px); } }
+
+.hero { padding: 8px 4px 22px; }
+.hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -.03em; font-weight: 650; }
+.name-input { font: inherit; color: var(--accent); background: none; border: 0; border-bottom: 1px dashed rgba(167,139,250,.4); padding: 0; max-width: 100%; }
+.muted { color: var(--muted); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.card { --c: var(--accent); border-radius: var(--radius); padding: 20px; min-height: 140px; background: linear-gradient(160deg, color-mix(in srgb, var(--c) 22%, transparent), color-mix(in srgb, var(--c) 6%, transparent)); border-color: color-mix(in srgb, var(--c) 40%, transparent); }
+.card.wide { grid-column: 1 / -1; }
+.card h2 { font-size: .95rem; font-weight: 800; font-style: italic; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 12px; color: var(--text); } .card h2::after { content: ''; display: block; width: 34px; height: 3px; border-radius: 3px; background: var(--c); margin-top: 6px; }
+.empty { padding: 40px; }
+.empty h1 { margin-bottom: 8px; }
+
+.small { font-size: .8rem; margin-top: 6px; }
+.row { display: flex; gap: 8px; align-items: center; } .between { justify-content: space-between; margin-bottom: 10px; }
+.btn { background: var(--accent); color: #12081f; font-weight: 600; padding: 11px 16px; border-radius: 14px; }
+.btn.ghost { background: rgba(255,255,255,.08); color: var(--text); }
+.toggle { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-size: .9rem; }
+.cal-wrap { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
+.mgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+.wd { font-size: .75rem; padding: 4px 0; }
+.day { aspect-ratio: 1; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+.day.today { box-shadow: inset 0 0 0 1px var(--accent); } .day.sel { background: var(--accent-soft); color: var(--accent); }
+.dots { display: flex; gap: 3px; height: 5px; } .dots i { width: 5px; height: 5px; border-radius: 50%; }
+.ev { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+.ev .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex-shrink: 0; }
+.ev-main { display: flex; flex-direction: column; flex: 1; min-width: 0; } .ev-main .muted { font-size: .8rem; }
+.x { color: var(--muted); padding: 6px; }
+.form { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.form input, .form select { font: inherit; color: var(--text); background: rgba(255,255,255,.07); border: 1px solid var(--glass-border); border-radius: 12px; padding: 10px 12px; width: 100%; color-scheme: dark; }
+.err { color: #ff8fab; font-size: .9rem; } .notice { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+.bar { height: 8px; border-radius: 8px; background: rgba(255,255,255,.1); margin: 10px 0 14px; overflow: hidden; } .bar i { display: block; height: 100%; background: var(--accent); border-radius: 8px; transition: width .4s; }
+.chk { display: flex; align-items: center; gap: 12px; padding: 9px 0; } .chk > span { flex: 1; }
+.box { width: 28px; height: 28px; border-radius: 9px; border: 1.5px solid var(--glass-border); display: grid; place-items: center; color: #12081f; flex-shrink: 0; } .box.on { background: var(--accent); border-color: var(--accent); }
+.inp, .form textarea { font: inherit; color: var(--text); background: rgba(255,255,255,.07); border: 1px solid var(--glass-border); border-radius: 12px; padding: 10px 12px; width: 100%; flex: 1; resize: vertical; color-scheme: dark; }
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; } .btn.ghost.act { background: var(--accent-soft); color: var(--accent); }
+.note { padding: 10px 0; border-top: 1px solid var(--glass-border); } .note p { white-space: pre-wrap; margin-top: 4px; }
+.day.sel { box-shadow: inset 0 0 0 2px #fff; }
+.heat { display: grid; grid-template-rows: repeat(7, 16px); grid-auto-flow: column; grid-auto-columns: minmax(16px, 1fr); gap: 4px; overflow-x: auto; padding: 12px 4px; scrollbar-width: none; } .heat::-webkit-scrollbar { display: none; }
+.heat i { position: relative; border-radius: 6px; background: rgba(255,255,255,.05); box-shadow: inset 0 0 0 1px rgba(255,255,255,.05); }
+.heat i.on { border: 1px solid rgba(255,255,255,.4); box-shadow: inset 0 1px 1px rgba(255,255,255,.6), inset 0 -3px 5px rgba(0,0,0,.28), 0 0 12px -1px var(--glow), 0 2px 8px rgba(0,0,0,.4); transition: transform .2s; }
+.heat i.on::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(155deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,.12) 38%, rgba(255,255,255,0) 60%); pointer-events: none; }
+.heat i.on:hover { transform: scale(1.35); z-index: 1; }
+.heat i.today { outline: 2px solid rgba(255,255,255,.75); outline-offset: 1px; }
+.legend { flex-wrap: wrap; gap: 14px; font-size: .85rem; margin-top: 8px; } .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 4px; margin-right: 6px; border: 1px solid rgba(255,255,255,.4); box-shadow: inset 0 1px 1px rgba(255,255,255,.5); vertical-align: -2px; }
+.wrapped { background: linear-gradient(160deg, rgba(167,139,250,.35), rgba(244,114,182,.16)); }
+.stat3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px; }
+.big { font-size: clamp(2.2rem, 8vw, 3.8rem); font-weight: 700; letter-spacing: -.04em; line-height: 1.1; }
+.trow { display: grid; grid-template-columns: 1fr auto; gap: 0 12px; } .trow .bar { grid-column: 1 / -1; margin: 4px 0 10px; }
+.prow { display: flex; gap: 10px; margin-bottom: 10px; align-items: stretch; }
+.tbadge { width: 74px; flex-shrink: 0; border-radius: 16px; background: rgba(255,255,255,.07); display: flex; flex-direction: column; align-items: center; justify-content: center; } .tbadge span { font-size: .75rem; color: var(--muted); }
+.pcard { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 20px; border-radius: 18px; background: rgba(255,255,255,.05); border: 1px solid var(--glass-border); position: relative; overflow: hidden; min-height: 64px; }
+.stripe { position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--c); } .strike { text-decoration: line-through; color: var(--muted); }
+.wdtabs { display: flex; gap: 6px; margin-bottom: 16px; } .wdtabs .btn { flex: 1; padding: 10px 0; }
+.tag { font-style: normal; font-size: .7rem; color: #12081f; padding: 2px 8px; border-radius: 8px; margin-left: 8px; }
+.lvl { display: flex; align-items: center; gap: 16px; } .ring { width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; font-size: 1.6rem; font-weight: 800; color: var(--accent); border: 3px solid var(--accent); }
+.micon { width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,.07); display: grid; place-items: center; font-size: 1.3rem; flex-shrink: 0; }
+.hero h1 { font-style: italic; font-weight: 800; }
+.lessons { margin-top: 10px; } .les { display: grid; grid-template-columns: 96px 1fr auto; gap: 8px; padding: 7px 0; border-top: 1px solid var(--glass-border); font-size: .9rem; }
+.pgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; } .fld { display: flex; flex-direction: column; gap: 4px; }
+.stat4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; } .stat4 .big { font-size: 1.8rem; }
+.chip { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--glass-border); background: rgba(255,255,255,.06); color: var(--text); margin: 6px 6px 0 0; } .chip.on { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+.avatar { width: 72px; height: 72px; border-radius: 22px; border: 2px solid var(--accent); display: grid; place-items: center; font-size: 2rem; font-weight: 800; color: var(--accent); flex-shrink: 0; } .chart { width: 100%; height: auto; }
+.day.g { position: relative; color: #fff; font-weight: 600; border: 1px solid rgba(255,255,255,.3); box-shadow: inset 0 1px 1px rgba(255,255,255,.5), 0 0 10px -3px var(--accent); }
+.hofcard { border-color: rgba(251,191,36,.5); box-shadow: 0 0 24px -6px rgba(251,191,36,.5), inset 0 1px 0 rgba(255,255,255,.2); }
+.flash { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 16px); transform: translateX(-50%); z-index: 50; max-width: min(92vw, 520px); padding: 14px 20px; border-radius: 18px; font-weight: 600; background: rgba(24,18,44,.82); border: 1px solid rgba(255,255,255,.35); box-shadow: 0 0 30px -4px var(--accent), inset 0 1px 0 rgba(255,255,255,.4); animation: pop .45s cubic-bezier(.2,.9,.3,1.2); cursor: pointer; }
+@keyframes pop { from { opacity: 0; transform: translate(-50%, -14px) scale(.9); } }
+@media (max-width: 900px) { .cal-wrap { grid-template-columns: 1fr; } }
+@media (max-width: 760px) {
+  .shell { flex-direction: column; padding: 14px 14px 96px; }
+  .nav { position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); top: auto; width: auto; flex-direction: row; padding: 6px; border-radius: 22px; overflow-x: auto; z-index: 10; }
+  .brand, .nav-label { display: none; }
+  .nav-item { padding: 12px 14px; flex: 1; justify-content: center; }
+  .nav-icon { font-size: 1.15rem; }
+}
+@media (prefers-reduced-motion: reduce) { .main { animation: none; } * { transition: none !important; } }
+
+:root { padding-top: env(safe-area-inset-top, 0px); }
+/* Feinschliff: ruhigeres, einheitliches Erscheinungsbild */
+:root { --muted: #9aa3b2; }
+body { font-size: 15px; line-height: 1.45; }
+.shell { gap: 24px; } .main { max-width: 1040px; margin: 0 auto; width: 100%; }
+.nav { width: 220px; scrollbar-width: none; } .nav::-webkit-scrollbar { display: none; }
+.nav-item { font-size: .95rem; }
+.hero { padding: 6px 4px 18px; } .hero h1 { font-size: clamp(1.6rem, 3.6vw, 2.3rem); letter-spacing: -.02em; }
+.card { padding: 20px; min-height: 0; background: linear-gradient(160deg, color-mix(in srgb, var(--c) 13%, transparent), color-mix(in srgb, var(--c) 4%, transparent)); border-color: color-mix(in srgb, var(--c) 28%, transparent); }
+.grid { gap: 14px; } .grid > .card { min-height: 112px; }
+.card h2 { font-size: .8rem; letter-spacing: .08em; margin-bottom: 14px; }
+input:not([type=checkbox]):not(.name-input), select, textarea { font: inherit; font-size: 16px; color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--glass-border); border-radius: 12px; padding: 0 12px; min-height: 44px; width: 100%; color-scheme: dark; transition: border-color .2s, box-shadow .2s; }
+textarea { padding: 10px 12px; min-height: 96px; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; transition: transform .15s, filter .15s, background .2s; }
+.btn:hover { filter: brightness(1.1); } .btn:active { transform: scale(.98); } .btn.ghost { border: 1px solid var(--glass-border); }
+.tabs, .wdtabs { overflow-x: auto; scrollbar-width: none; }
+.x { min-width: 36px; min-height: 36px; border-radius: 10px; } .x:hover { background: rgba(255,255,255,.08); color: var(--text); }
+.box { width: 30px; height: 30px; transition: background .15s, border-color .15s; }
+.chk, .ev { border-bottom: 1px solid rgba(255,255,255,.06); } .chk:last-child, .ev:last-child { border-bottom: 0; } .ev { padding: 10px 0; }
+.pcard { background: rgba(255,255,255,.04); }
+.row { gap: 10px; } .form { gap: 10px; }
+@media (max-width: 760px) {
+  .shell { gap: 14px; }
+  .nav { gap: 2px; }
+  .nav-item { flex-direction: column; gap: 2px; min-width: 62px; padding: 8px 6px; }
+  .nav-label { display: block; font-size: .65rem; white-space: nowrap; }
+}
+@media (max-width: 560px) { .stat4 { grid-template-columns: repeat(2, 1fr); } .les { grid-template-columns: 84px 1fr; } .les > :last-child { grid-column: 2; } }
+.auth { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+</head><body><div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+const APP_NAME = 'TrainingHub', DEFAULT_USER = 'Athlet';
+const NAV = [
+  { id: 'dashboard', label: 'Dashboard', icon: '◧', phase: 1 },
+  { id: 'plan', label: 'Tagesplan', icon: '☰', phase: 4 },
+  { id: 'tasks', label: 'Aufgaben', icon: '✓', phase: 4 },
+  { id: 'training', label: 'Training', icon: '▤', phase: 5 },
+  { id: 'food', label: 'Ernährung', icon: '◔', phase: 6 },
+  { id: 'activity', label: 'Aktivität', icon: '↗', phase: 8 },
+  { id: 'sleep', label: 'Schlaf', icon: '☾', phase: 10 },
+  { id: 'profile', label: 'Profil', icon: '☺', phase: 0 },
+];
+function useLocalStorage(key, initial) {
+  const [value, setValue] = useState(() => {
+    try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : initial; } catch (e) { return initial; }
+  });
+  useEffect(() => { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {} }, [key, value]);
+  return [value, setValue];
+}
+function Card({ title, children, wide, color }) {
+  return <section className={'card glass' + (wide ? ' wide' : '')} style={color ? { '--c': color } : undefined}><h2>{title}</h2>{children}</section>;
+}
+function greeting() { const h = new Date().getHours(); return h < 11 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend'; }
+function Dashboard() {
+  const [name, setName] = useLocalStorage('th.name', DEFAULT_USER);
+  const date = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const empty = t => <p className="muted">{t}</p>;
+  const [events, setEvents] = useLocalStorage('th.events', []);
+  const [dItems] = useLocalStorage('th.checks', DEFAULT_CHECKS);
+  const [dDone] = useLocalStorage('th.checkdone', {});
+  const dCount = dItems.filter(i => (dDone[dstr(new Date())] || []).includes(i.id)).length;
+  const [plan] = useLocalStorage('th.plan', {}); const [pd] = useLocalStorage('th.plandone', {});
+  const [meals] = useLocalStorage('th.meals', DEFAULT_MEALS); const [mDone] = useLocalStorage('th.mealdone', {});
+  const tdate = dstr(new Date()), tdow = (new Date().getDay() + 6) % 7;
+  const pToday = plan[tdow] || [], pCount = pToday.filter(i => (pd[tdate] || []).includes(i.id)).length;
+  const mCount = meals.filter(x => (mDone[tdate] || []).includes(x.id)).length;
+  const sum = o => Object.values(o).reduce((s, a) => s + a.length, 0);
+  const xp = sum(dDone) * 10 + sum(mDone) * 10 + doneAll(events, plan, pd, dItems, dDone).length * 50;
+  const level = Math.floor(xp / 400) + 1, into = xp % 400;
+  const [tasks] = useLocalStorage('th.tasks', []);
+  const tToday = tasks.filter(t => occurs(t, tdate)), tCount = tToday.filter(t => (t.doneOn || []).includes(tdate)).length;
+  const mTotal = dItems.length + meals.length + pToday.length + tToday.length, mDoneN = dCount + mCount + pCount + tCount;
+  const streak = dailyStreak(dItems, dDone);
+  const [act] = useLocalStorage('th.act', {}); const [aGoal] = useLocalStorage('th.actgoal', ACT_GOAL);
+  const [slp] = useLocalStorage('th.sleep', {}); const [sGoal] = useLocalStorage('th.sleepgoal', 8); const sNow = slp[tdate] ? sleepMin(slp[tdate].bed, slp[tdate].wake) : 0;
+  const stepsToday = (act[tdate] || {}).steps || 0;
+  const quote = QUOTES[Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 864e5) % QUOTES.length];
+  const now = dstr(new Date()) + fmt(new Date().getHours() * 60 + new Date().getMinutes());
+  const upcoming = events.filter(e => e.date + e.end >= now).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start)).slice(0, 4);
+  const todayWork = events.filter(e => e.date === dstr(new Date()) && WORKOUT(e.cat)).sort((a, b) => a.start.localeCompare(b.start));
+  return (<>
+    <header className="hero"><p className="muted">{date}</p>
+      <h1>{greeting()}, <input className="name-input" value={name} aria-label="Dein Name" onChange={e => setName(e.target.value)} size={Math.max(name.length, 3)} /></h1></header>
+    <div className="grid">
+      <Card title="Level" wide>
+        <div className="lvl"><div className="ring">{level}</div>
+          <div style={{ flex: 1 }}><div className="row between" style={{ marginBottom: 0 }}><b>{RANKS[Math.min(level - 1, RANKS.length - 1)]}</b><span className="muted">🔥 {streak}</span></div>
+            <div className="bar"><i style={{ width: (into / 4) + '%' }} /></div><span className="muted small">{into} / 400 XP bis Level {level + 1}</span></div></div></Card>
+      <Card title="Heutige Missionen" wide>
+        <div className="row between" style={{ marginBottom: 0 }}><b>{mDoneN} von {mTotal} erledigt</b><span className="muted">{mTotal ? Math.round(mDoneN / mTotal * 100) : 0} %</span></div>
+        <div className="bar"><i style={{ width: (mTotal ? mDoneN / mTotal * 100 : 0) + '%' }} /></div>
+        <p className="muted small">Daily Check {dCount}/{dItems.length} · Mahlzeiten {mCount}/{meals.length} · Tagesplan {pCount}/{pToday.length} · Aufgaben {tCount}/{tToday.length}</p></Card>
+      <Card title="Tageszitat" wide><p style={{ fontStyle: 'italic' }}>{quote}</p></Card>
+      <Card title="Nächste Termine" color="#a78bfa">{upcoming.length ? upcoming.map(e => <div key={e.id}><p className="muted small">{deDate(e.date)}</p><EventRow e={e} /></div>) : empty('Keine Termine. Trage welche im Kalender ein.')}</Card>
+      <Card title="Heutiges Training" color="#a78bfa">{todayWork.length ? todayWork.map(e => <EventRow key={e.id} e={e} onToggle={() => setEvents(events.map(x => x.id === e.id ? { ...x, done: !x.done } : x))} />) : empty('Heute ist kein Workout geplant.')}</Card>
+      <Card title="Mahlzeiten" color="#a78bfa">{empty('Noch nichts geplant.')}</Card>
+      <Card title="Schritte" color="#a78bfa"><b className="big" style={{ fontSize: '1.8rem' }}>{nf(stepsToday)}</b> <span className="muted">von {nf(aGoal.steps)}</span><div className="bar"><i style={{ width: Math.min(100, stepsToday / aGoal.steps * 100) + '%' }} /></div></Card>
+      <Card title="Schlaf" color="#a78bfa">{sNow ? <><b className="big" style={{ fontSize: '1.8rem' }}>{hm(sNow)}</b> <span className="muted">von {sGoal} h</span><div className="bar"><i style={{ width: Math.min(100, sNow / 60 / sGoal * 100) + '%' }} /></div></> : empty('Noch kein Schlaf für heute eingetragen.')}</Card>
+      <Card title="Daily Check" color="#a78bfa">{dItems.length ? <><p>{dCount} von {dItems.length} erledigt</p><div className="bar"><i style={{ width: (dCount / dItems.length * 100) + '%' }} /></div></> : empty('Noch kein Plan angelegt.')}</Card>
+      <Card title="Ziele" wide color="#a78bfa">{empty('Ziele und Fortschritt erscheinen hier.')}</Card>
+    </div></>);
+}
+const CATS = { Gym: '#a78bfa', 'Football Teamtraining': '#f472b6', 'Football Field Session': '#22d3ee', 'Schule / Arbeit': '#fbbf24', Freizeit: '#60a5fa', 'Ernährung': '#fb923c', Erholung: '#2dd4bf', Sonstiges: '#94a3b8' };
+const WORKOUT = c => c === 'Gym' || c.startsWith('Football');
+const pad = n => String(n).padStart(2, '0');
+const dstr = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const toM = t => +t.slice(0, 2) * 60 + +t.slice(3, 5);
+const fmt = m => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
+const clash = (a, b) => a.date === b.date && toM(a.start) < toM(b.end) && toM(b.start) < toM(a.end);
+const deDate = s => new Date(s + 'T12:00').toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' });
+// Nächster freier Slot am selben Tag (06:00–22:00), möglichst nah an der Originalzeit
+function findSlot(ev, others) {
+  const dur = toM(ev.end) - toM(ev.start); let best = null;
+  for (let s = 360; s + dur <= 1320; s += 15) {
+    const c = { ...ev, start: fmt(s), end: fmt(s + dur) };
+    if (!others.some(o => clash(c, o)) && (best === null || Math.abs(s - toM(ev.start)) < Math.abs(best - toM(ev.start)))) best = s;
+  }
+  return best;
+}
+function nextDay(ev, others) {
+  for (let i = 1; i <= 3; i++) {
+    const d = new Date(ev.date + 'T12:00'); d.setDate(d.getDate() + i);
+    const e = { ...ev, date: dstr(d) }; const s = findSlot(e, others);
+    if (s !== null) return { date: e.date, s };
+  }
+  return null;
+}
+function EventRow({ e, onDel, onToggle }) {
+  return (<div className="ev" style={{ '--c': CATS[e.cat] }}><span className="dot" />
+    <div className="ev-main"><b>{e.title}</b><span className="muted">{e.start}–{e.end} · {e.cat}</span></div>
+    {onToggle && WORKOUT(e.cat) && <button className={'box' + (e.done ? ' on' : '')} aria-pressed={!!e.done} aria-label="Training abgeschlossen" onClick={onToggle}>{e.done ? '✓' : ''}</button>}
+    {onDel && <button className="x" aria-label="Termin löschen" onClick={onDel}>✕</button>}</div>);
+}
+function Calendar() {
+  const [events, setEvents] = useLocalStorage('th.events', []);
+  const [plan] = useLocalStorage('th.plan', {}); const [pd] = useLocalStorage('th.plandone', {});
+  const [tasks] = useLocalStorage('th.tasks', []);
+  const [auto, setAuto] = useLocalStorage('th.auto', false);
+  const [log, setLog] = useLocalStorage('th.log', []);
+  const [month, setMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
+  const [sel, setSel] = useState(dstr(new Date()));
+  const [form, setForm] = useState({ title: '', cat: 'Gym', start: '17:00', end: '18:00' });
+  const [pending, setPending] = useState(null);
+  const [err, setErr] = useState('');
+  const set = k => e => setForm({ ...form, [k]: e.target.value });
+
+  const commit = p => {
+    const ids = p.moves.map(m => m.from.id);
+    setEvents([...events.filter(e => !ids.includes(e.id)), ...p.moves.map(m => m.to), p.ev]);
+    const lines = p.moves.map(m => m.from.title + ': ' + deDate(m.from.date) + ' ' + m.from.start + ' → ' + deDate(m.to.date) + ' ' + m.to.start + ' (wegen ' + p.ev.title + ')');
+    if (lines.length) setLog([...lines, ...log].slice(0, 15));
+    setPending(null);
+  };
+  const add = () => {
+    setErr('');
+    if (!form.title.trim()) return setErr('Gib dem Termin einen Titel.');
+    if (toM(form.end) <= toM(form.start)) return setErr('Das Ende muss nach dem Start liegen.');
+    const ev = { ...form, title: form.title.trim(), date: sel, id: Date.now() };
+    const hits = events.filter(e => clash(e, ev));
+    if (hits.length && (WORKOUT(ev.cat) || hits.some(h => !WORKOUT(h.cat)))) {
+      const s = WORKOUT(ev.cat) ? findSlot(ev, events) : null;
+      return setErr('Überschneidung mit ' + hits[0].title + ' (' + hits[0].start + '–' + hits[0].end + ').' + (s !== null ? ' Freier Slot: ' + fmt(s) + ' Uhr.' : ''));
+    }
+    const pool = [...events.filter(e => !hits.includes(e)), ev]; const moves = [];
+    for (const h of hits) {
+      let date = h.date, s = findSlot(h, pool);
+      if (s === null) { const alt = nextDay(h, pool); if (!alt) return setErr('Kein freier Zeitpunkt für ' + h.title + '. Verschiebe es manuell.'); date = alt.date; s = alt.s; }
+      const to = { ...h, date, start: fmt(s), end: fmt(s + toM(h.end) - toM(h.start)) };
+      moves.push({ from: h, to }); pool.push(to);
+    }
+    const p = { ev, moves };
+    if (moves.length && !auto) setPending(p); else commit(p);
+    setForm({ ...form, title: '' });
+  };
+
+  const y = month.getFullYear(), m = month.getMonth();
+  const offset = (new Date(y, m, 1).getDay() + 6) % 7, days = new Date(y, m + 1, 0).getDate();
+  const cells = [...Array(offset).fill(null), ...Array.from({ length: days }, (_, i) => dstr(new Date(y, m, i + 1)))];
+  const today = dstr(new Date());
+  const dayEvents = events.filter(e => e.date === sel).sort((a, b) => a.start.localeCompare(b.start));
+
+  return (<>
+    <header className="hero"><h1>Termine</h1>
+      <label className="toggle muted"><input type="checkbox" checked={auto} onChange={e => setAuto(e.target.checked)} /> Workouts bei Konflikten automatisch verschieben</label></header>
+    {pending && <div className="card glass notice"><b>Workout verschieben?</b>
+      {pending.moves.map(x => <p key={x.from.id}>{x.from.title}: {deDate(x.from.date)} {x.from.start} → {deDate(x.to.date)} {x.to.start}</p>)}
+      <div className="row"><button className="btn" onClick={() => commit(pending)}>Bestätigen</button><button className="btn ghost" onClick={() => setPending(null)}>Neuen Termin verwerfen</button></div></div>}
+    <div className="cal-wrap">
+      <section className="card glass">
+        <div className="row between"><button className="btn ghost" aria-label="Vorheriger Monat" onClick={() => setMonth(new Date(y, m - 1, 1))}>‹</button>
+          <b>{month.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}</b>
+          <button className="btn ghost" aria-label="Nächster Monat" onClick={() => setMonth(new Date(y, m + 1, 1))}>›</button></div>
+        <div className="mgrid">{['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(d => <span key={d} className="muted wd">{d}</span>)}
+          {cells.map((c, i) => c ? <button key={c} className={'day' + (c === sel ? ' sel' : '') + (c === today ? ' today' : '')} onClick={() => setSel(c)}>
+            {+c.slice(8)}<span className="dots">{events.filter(e => e.date === c).slice(0, 3).map(e => <i key={e.id} style={{ background: CATS[e.cat] }} />)}</span></button> : <span key={'e' + i} />)}</div>
+      </section>
+      <section className="card glass">
+        <h2>{deDate(sel)}</h2>
+        {dayEvents.length ? dayEvents.map(e => <EventRow key={e.id} e={e} onToggle={() => setEvents(events.map(x => x.id === e.id ? { ...x, done: !x.done } : x))} onDel={() => setEvents(events.filter(x => x.id !== e.id))} />) : <p className="muted">Keine Termine. Trage unten einen ein.</p>}
+        <div className="form">
+          <input placeholder="Titel, z. B. Beine" value={form.title} onChange={set('title')} />
+          <select value={form.cat} onChange={set('cat')}>{Object.keys(CATS).map(c => <option key={c}>{c}</option>)}</select>
+          <div className="row"><input type="time" value={form.start} onChange={set('start')} /><input type="time" value={form.end} onChange={set('end')} /></div>
+          {err && <p className="err" role="alert">{err}</p>}
+          <button className="btn" onClick={add}>Termin speichern</button>
+        </div>
+      </section>
+    </div>
+    {log.length > 0 && <section className="card glass" style={{ marginTop: 16 }}><h2>Änderungsprotokoll</h2>{log.map((l, i) => <p key={i} className="muted">{l}</p>)}</section>}
+  </>);
+}
+const DEFAULT_CHECKS = [{ id: 1, t: 'Wasser trinken (3 L)' }, { id: 2, t: 'Protein-Ziel erreicht' }, { id: 3, t: 'Mobility / Dehnen' }, { id: 4, t: 'Schritte-Ziel' }, { id: 5, t: 'Rechtzeitig ins Bett' }];
+function DailyCheck() {
+  const [items, setItems] = useLocalStorage('th.checks', DEFAULT_CHECKS);
+  const [done, setDone] = useLocalStorage('th.checkdone', {});
+  const [tcat, setTcat] = useState('');
+  const [txt, setTxt] = useState('');
+  const today = dstr(new Date()), mine = done[today] || [];
+  const toggle = id => setDone({ ...done, [today]: mine.includes(id) ? mine.filter(x => x !== id) : [...mine, id] });
+  const count = items.filter(i => mine.includes(i.id)).length;
+  const full = d => items.length > 0 && items.every(i => (done[d] || []).includes(i.id));
+  let streak = 0; const d = new Date(); if (!full(dstr(d))) d.setDate(d.getDate() - 1);
+  while (full(dstr(d))) { streak++; d.setDate(d.getDate() - 1); }
+  const add = () => { if (txt.trim()) { setItems([...items, { id: Date.now(), t: txt.trim(), cat: tcat || undefined }]); setTxt(''); } };
+  return (<>
+    <header className="hero"><p className="muted">{deDate(today)}</p><h1>Daily Check</h1></header>
+    <section className="card glass">
+      <div className="row between"><b>{count} von {items.length} erledigt</b><span className="muted">Streak: {streak} {streak === 1 ? 'Tag' : 'Tage'}</span></div>
+      <div className="bar"><i style={{ width: (items.length ? count / items.length * 100 : 0) + '%' }} /></div>
+      {items.map(i => (<div key={i.id} className="chk">
+        <button className={'box' + (mine.includes(i.id) ? ' on' : '')} aria-pressed={mine.includes(i.id)} aria-label={i.t} onClick={() => toggle(i.id)}>{mine.includes(i.id) ? '✓' : ''}</button>
+        <span className={mine.includes(i.id) ? 'muted' : ''}>{i.t}{i.cat && <em className="tag" style={{ background: CATS[i.cat] }}>{i.cat}</em>}</span>
+        <button className="x" aria-label="Punkt löschen" onClick={() => setItems(items.filter(x => x.id !== i.id))}>✕</button></div>))}
+      <div className="row" style={{ marginTop: 14, flexWrap: 'wrap' }}><input className="inp" placeholder="Neuer Punkt, z. B. Creatin nehmen" value={txt} onChange={e => setTxt(e.target.value)} onKeyDown={e => e.key === 'Enter' && add()} /><select className="inp" style={{ flex: '0 0 auto', width: 'auto' }} value={tcat} onChange={e => setTcat(e.target.value)} aria-label="Zählt als Training"><option value="">Kein Training</option>{Object.keys(CATS).filter(WORKOUT).map(c => <option key={c}>{c}</option>)}</select><button className="btn" onClick={add}>Hinzufügen</button></div>
+    </section></>);
+}
+function Football() {
+  const [list, setList] = useLocalStorage('th.fb', []);
+  const [tab, setTab] = useState('Teamtraining');
+  const [f, setF] = useState({ date: dstr(new Date()), note: '' });
+  const hint = tab === 'Teamtraining' ? 'Was wurde trainiert? Schemes, Coach-Feedback, Position…' : 'Sprints, Routen, Catches, Technik, Zeiten…';
+  const save = () => { if (f.note.trim()) { setList([{ id: Date.now(), type: tab, date: f.date, note: f.note.trim() }, ...list]); setF({ ...f, note: '' }); } };
+  const shown = list.filter(s => s.type === tab).sort((a, b) => b.date.localeCompare(a.date));
+  return (<>
+    <header className="hero"><h1>Football</h1></header>
+    <div className="tabs">{['Teamtraining', 'Field Session'].map(t => <button key={t} className={'btn ghost' + (tab === t ? ' act' : '')} onClick={() => setTab(t)}>{t}</button>)}</div>
+    <div className="cal-wrap">
+      <section className="card glass" style={{ '--c': CATS['Football ' + tab] }}><h2>Neuer Eintrag: {tab}</h2>
+        <div className="form"><input type="date" value={f.date} onChange={e => setF({ ...f, date: e.target.value })} />
+          <textarea rows="6" placeholder={hint} value={f.note} onChange={e => setF({ ...f, note: e.target.value })} />
+          <button className="btn" onClick={save}>Eintrag speichern</button></div></section>
+      <section className="card glass" style={{ '--c': CATS['Football ' + tab] }}><h2>{tab}: Verlauf</h2>
+        {shown.length ? shown.map(s => (<div key={s.id} className="note"><div className="row between"><b>{deDate(s.date)}</b><button className="x" aria-label="Eintrag löschen" onClick={() => setList(list.filter(x => x.id !== s.id))}>✕</button></div><p className="muted">{s.note}</p></div>)) : <p className="muted">Noch keine Einträge. Schreib links deine erste Session auf.</p>}</section>
+    </div></>);
+}
+// Ein Workout zählt erst, wenn es ausdrücklich als abgeschlossen markiert ist
+const isDone = e => WORKOUT(e.cat) && e.done === true;
+// Mehrere Trainingsarten am Tag = Farbfläche geteilt
+const splitBg = cats => {
+  const cs = [...new Set(cats)].map(c => CATS[c] || '#a78bfa'); if (!cs.length) return null;
+  if (cs.length === 1) return cs[0];
+  return 'linear-gradient(90deg,' + cs.map((c, i) => c + ' ' + (i * 100 / cs.length) + '% ' + ((i + 1) * 100 / cs.length) + '%').join(',') + ')';
+};
+const checkedDaily = (items, cd) => Object.keys(cd).flatMap(date => items.filter(i => i.cat && (cd[date] || []).includes(i.id)).map(i => ({ id: 'd' + date + i.id, date, cat: i.cat, title: i.t, start: '00:00', end: '00:00' })));
+// Alle abgeschlossenen Trainings aus Kalender, Tagesplan und Daily Check, pro Tag und Art nur einmal
+const doneAll = (events, plan, pd, items, cd) => {
+  const best = {};
+  [...events.filter(isDone), ...checkedPlan(plan, pd), ...checkedDaily(items, cd), ...gymDays()].forEach(e => {
+    const k = e.date + e.cat;
+    if (!best[k] || toM(e.end) - toM(e.start) > toM(best[k].end) - toM(best[k].start)) best[k] = e;
+  });
+  return Object.values(best);
+};
+function Stats() {
+  const [events] = useLocalStorage('th.events', []);
+  const [plan] = useLocalStorage('th.plan', {}); const [pd] = useLocalStorage('th.plandone', {});
+  const [dItems] = useLocalStorage('th.checks', DEFAULT_CHECKS); const [dCd] = useLocalStorage('th.checkdone', {});
+  const [mo, setMo] = useState(() => { const d = new Date(); d.setDate(1); return d; });
+  const done = doneAll(events, plan, pd, dItems, dCd), y = mo.getFullYear(), m = mo.getMonth();
+  const inMonth = done.filter(e => e.date.startsWith(y + '-' + pad(m + 1)));
+  const hrs = list => list.reduce((s, e) => s + toM(e.end) - toM(e.start), 0) / 60;
+  const types = Object.keys(CATS).filter(WORKOUT).map(t => { const l = inMonth.filter(e => e.cat === t); return { t, n: l.length, h: hrs(l) }; });
+  const top = [...types].sort((a, b) => b.n - a.n)[0];
+  const byDate = {}; done.forEach(e => { (byDate[e.date] = byDate[e.date] || []).push(e.cat); });
+  const jan1 = new Date(y, 0, 1), total = (new Date(y + 1, 0, 1) - jan1) / 864e5;
+  const cells = [...Array((jan1.getDay() + 6) % 7).fill(null), ...Array.from({ length: Math.round(total) }, (_, i) => dstr(new Date(y, 0, i + 1)))];
+  const heatRef = useRef(null);
+  useEffect(() => { const el = heatRef.current, i = cells.indexOf(dstr(new Date())); if (el && i >= 0) el.scrollLeft = el.scrollWidth * (i / cells.length) - el.clientWidth / 2; }, [y]);
+  const fmtH = h => (Math.round(h * 10) / 10).toString().replace('.', ',');
+  return (<>
+    <header className="hero"><h1>Training</h1></header>
+    <section className="card glass" style={{ marginBottom: 16, background: 'radial-gradient(60% 90% at 15% 0%, rgba(167,139,250,.22), transparent 70%), radial-gradient(50% 80% at 90% 100%, rgba(244,114,182,.18), transparent 70%), rgba(255,255,255,.04)' }}><h2>Trainings {y}</h2>
+      <div className="heat" ref={heatRef}>{cells.map((c, i) => <i key={i} title={c ? deDate(c) + (byDate[c] ? ': ' + [...new Set(byDate[c])].join(' + ') : '') : ''} className={(c && byDate[c] ? 'on' : '') + (c === dstr(new Date()) ? ' today' : '')} style={c && byDate[c] ? { background: splitBg(byDate[c]), '--glow': CATS[byDate[c][0]] || '#a78bfa' } : c ? undefined : { visibility: 'hidden' }} />)}</div>
+      <div className="row legend">{Object.keys(CATS).filter(WORKOUT).map(t => <span key={t} className="muted"><i style={{ background: CATS[t] }} />{t}</span>)}</div></section>
+    <section className="card glass wrapped">
+      <div className="row between"><button className="btn ghost" aria-label="Vorheriger Monat" onClick={() => setMo(new Date(y, m - 1, 1))}>‹</button>
+        <b>{mo.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}</b>
+        <button className="btn ghost" aria-label="Nächster Monat" onClick={() => setMo(new Date(y, m + 1, 1))}>›</button></div>
+      {inMonth.length ? <>
+        <div className="stat3">
+          <div><div className="big">{new Set(inMonth.map(e => e.date)).size}</div><span className="muted">Trainingstage</span></div>
+          <div><div className="big">{inMonth.length}</div><span className="muted">Sessions</span></div>
+          <div><div className="big">{fmtH(hrs(inMonth))}</div><span className="muted">Stunden</span></div></div>
+        <p style={{ margin: '20px 0 8px' }}>Dein Schwerpunkt: <b style={{ color: CATS[top.t] }}>{top.t}</b> mit {top.n} {top.n === 1 ? 'Session' : 'Sessions'}</p>
+        {types.map(x => <div key={x.t} className="trow"><span>{x.t}</span><span className="muted">{x.n}× · {fmtH(x.h)} h</span><div className="bar"><i style={{ width: (x.n / top.n * 100) + '%', background: CATS[x.t] }} /></div></div>)}
+      </> : <p className="muted" style={{ marginTop: 16 }}>In diesem Monat gibt es noch keine absolvierten Trainings.</p>}
+    </section></>);
+}
+const WD = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+// Abgehakte Workouts aus dem Tagesplan zählen wie absolvierte Kalender-Workouts
+const checkedPlan = (plan, pd) => Object.keys(pd).flatMap(date => {
+  const dow = (new Date(date + 'T12:00').getDay() + 6) % 7;
+  return (plan[dow] || []).filter(i => WORKOUT(i.cat) && (pd[date] || []).includes(i.id)).map(i => ({ ...i, id: date + '-' + i.id, date }));
+});
+function Plan() {
+  const [plan, setPlan] = useLocalStorage('th.plan', {});
+  const [pd, setPd] = useLocalStorage('th.plandone', {});
+  const [events] = useLocalStorage('th.events', []);
+  const [tasks, setTasks] = useLocalStorage('th.tasks', []);
+  const today = new Date(), tdow = (today.getDay() + 6) % 7;
+  const [dow, setDow] = useState(tdow);
+  const [f, setF] = useState({ title: '', cat: 'Gym', start: '17:15', end: '20:00', days: [], lessons: '' });
+  const [err, setErr] = useState(''); const [adding, setAdding] = useState(false); const [open, setOpen] = useState(null);
+  const d = new Date(today); d.setDate(d.getDate() - tdow + dow); const date = dstr(d);
+  const items = plan[dow] || [], mine = pd[date] || [];
+  const rows = [...items.map(i => ({ ...i, own: true })), ...events.filter(e => e.date === date).map(e => ({ ...e, id: 'ev' + e.id })), ...tasks.filter(t => occurs(t, date)).map(t => ({ id: 't' + t.id, tid: t.id, task: true, own: true, title: t.title, cat: 'Aufgabe', prio: t.prio, start: t.time || '--:--', end: t.end || '', done: (t.doneOn || []).includes(date) }))].sort((a, b) => a.start.localeCompare(b.start));
+  const doneN = items.filter(i => mine.includes(i.id)).length;
+  const toggle = id => setPd({ ...pd, [date]: mine.includes(id) ? mine.filter(x => x !== id) : [...mine, id] });
+  const toggleTask = id => setTasks(tasks.map(x => x.id === id ? { ...x, doneOn: (x.doneOn || []).includes(date) ? x.doneOn.filter(y => y !== date) : [...(x.doneOn || []), date] } : x));
+  const add = () => {
+    if (!f.title.trim()) return setErr('Gib dem Eintrag einen Titel.');
+    if (toM(f.end) <= toM(f.start)) return setErr('Das Ende muss nach dem Start liegen.');
+    const ls = f.lessons.split('\n').map(l => l.split(',').map(x => x.trim())).map(([t, s, room]) => { const m = (t || '').match(/^(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})$/); return m && s ? { start: pad(+m[1]) + ':' + m[2], end: pad(+m[3]) + ':' + m[4], s, room: room || '', t: '' } : null; }).filter(Boolean);
+    const targets = f.days.length ? f.days : [dow], next = { ...plan };
+    targets.forEach((d, n) => { next[d] = [...(next[d] || []), { id: Date.now() + n, title: f.title.trim(), cat: f.cat, start: f.start, end: f.end, ...(ls.length ? { lessons: ls } : {}) }]; });
+    setErr(''); setPlan(next); setF({ ...f, title: '', lessons: '' });
+  };
+  return (<>
+    <header className="hero"><p className="muted">{deDate(date)} · {doneN} von {items.length} erledigt</p><h1>{WD[dow]}</h1></header>
+    <div className="wdtabs">{WD.map((w, i) => <button key={w} className={'btn ghost' + (i === dow ? ' act' : '')} onClick={() => setDow(i)}>{w.slice(0, 2)}</button>)}</div>
+    {rows.length ? rows.map(r => { const on = r.task ? r.done : mine.includes(r.id); return (
+      <div key={r.id} className="prow" style={{ '--c': r.task ? PRIO[r.prio] : CATS[r.cat] || '#94a3b8' }}>
+        <div className="tbadge"><b>{r.start}</b><span>{r.end}</span></div>
+        <div className="pcard"><span className="stripe" />
+          <div className="ev-main" role={r.lessons ? 'button' : undefined} tabIndex={r.lessons ? 0 : undefined} aria-expanded={r.lessons ? open === r.id : undefined} style={r.lessons ? { cursor: 'pointer' } : undefined} onClick={r.lessons ? () => setOpen(open === r.id ? null : r.id) : undefined}><b className={on ? 'strike' : ''}>{r.title}</b><span className="muted">{r.cat}{!r.own && ' · aus dem Kalender'}{r.lessons && (open === r.id ? ' · Tippen zum Einklappen' : ' · Tippen für Fächer & Räume')}</span>
+            {open === r.id && r.lessons && <div className="lessons">{r.lessons.map(l => <div key={l.start} className="les"><span className="muted">{l.start}–{l.end}</span><b>{l.s}</b><span className="muted">{[l.room, l.t].filter(Boolean).join(' · ')}</span></div>)}</div>}</div>
+          {r.own && <><button className={'box' + (on ? ' on' : '')} aria-pressed={on} aria-label={r.title + ' abhaken'} onClick={() => r.task ? toggleTask(r.tid) : toggle(r.id)}>{on ? '✓' : ''}</button>
+            <button className="x" aria-label="Eintrag löschen" onClick={() => r.task ? setTasks(tasks.filter(x => x.id !== r.tid)) : setPlan({ ...plan, [dow]: items.filter(x => x.id !== r.id) })}>✕</button></>}
+        </div></div>); }) : <p className="muted">Für {WD[dow]} ist noch nichts geplant.</p>}
+    <button className="btn ghost" style={{ margin: '8px 0' }} onClick={() => setAdding(!adding)}>{adding ? 'Schließen' : '+ Zum ' + WD[dow] + ' hinzufügen'}</button>
+    {adding && <section className="card glass"><p className="muted">Wiederholt sich jede Woche an den gewählten Tagen:</p><div>{WD.map((w, i) => { const cur = f.days.length ? f.days : [dow], on = cur.includes(i); return <button key={w} className={'chip' + (on ? ' on' : '')} aria-pressed={on} onClick={() => setF({ ...f, days: on ? cur.filter(x => x !== i) : [...cur, i] })}>{w.slice(0, 2)}</button>; })}<button className="chip" onClick={() => setF({ ...f, days: [0, 1, 2, 3, 4] })}>Mo–Fr</button><button className="chip" onClick={() => setF({ ...f, days: [0, 1, 2, 3, 4, 5, 6] })}>Täglich</button></div>
+      <div className="form"><input placeholder="Titel, z. B. Brust" value={f.title} onChange={e => setF({ ...f, title: e.target.value })} />
+        <select value={f.cat} onChange={e => setF({ ...f, cat: e.target.value })}>{Object.keys(CATS).map(c => <option key={c}>{c}</option>)}</select>
+        <div className="row"><input type="time" value={f.start} onChange={e => setF({ ...f, start: e.target.value })} /><input type="time" value={f.end} onChange={e => setF({ ...f, end: e.target.value })} /></div>
+        {err && <p className="err" role="alert">{err}</p>}<textarea rows="4" placeholder={'Optional: Unterpunkte, eine Zeile pro Stunde\n07:50-08:35, G, 117'} value={f.lessons} onChange={e => setF({ ...f, lessons: e.target.value })} /><button className="btn" onClick={add}>Speichern</button></div></section>}
+  </>);
+}
+const RANKS = ['Rookie', 'Starter', 'Contender', 'Veteran', 'All-Pro', 'Heisman', 'Hall of Fame'];
+const QUOTES = ['Disziplin schlägt Motivation, jeden Tag.', 'Ein gutes Training ist besser als ein perfekter Plan.', 'Klein anfangen, konstant bleiben, groß werden.', 'Heute zählt: eine Wiederholung mehr als gestern.', 'Erholung gehört zum Training dazu.', 'Du musst nicht perfekt sein, nur dabei.', 'Konstanz baut, was Motivation nur plant.'];
+const dailyStreak = (items, done) => {
+  const full = d => items.length > 0 && items.every(i => (done[d] || []).includes(i.id));
+  let s = 0; const d = new Date(); if (!full(dstr(d))) d.setDate(d.getDate() - 1);
+  while (full(dstr(d))) { s++; d.setDate(d.getDate() - 1); }
+  return s;
+};
+const DEFAULT_MEALS = [{ id: 1, t: 'Frühstück + Shake', time: '07:30' }, { id: 2, t: 'Mittagessen', time: '11:00' }, { id: 3, t: 'Snack', time: '14:00' }, { id: 4, t: 'Abendessen', time: '19:00' }, { id: 5, t: 'Snack', time: '20:00' }];
+const mealIcon = t => /früh/i.test(t) ? '🥣' : /mittag/i.test(t) ? '🍔' : /snack/i.test(t) ? '🍪' : /abend/i.test(t) ? '🍝' : '🍽️';
+function Meals() {
+  const [meals, setMeals] = useLocalStorage('th.meals', DEFAULT_MEALS);
+  const [md, setMd] = useLocalStorage('th.mealdone', {});
+  const [f, setF] = useState({ t: '', time: '12:00' });
+  const today = dstr(new Date()), mine = md[today] || [];
+  const n = meals.filter(x => mine.includes(x.id)).length, pct = meals.length ? Math.round(n / meals.length * 100) : 0;
+  const toggle = id => setMd({ ...md, [today]: mine.includes(id) ? mine.filter(x => x !== id) : [...mine, id] });
+  const add = () => { if (f.t.trim()) { setMeals([...meals, { id: Date.now(), t: f.t.trim(), time: f.time }]); setF({ ...f, t: '' }); } };
+  return (<>
+    <header className="hero"><p className="muted">{deDate(today)}</p><h1>Tagesaufnahme</h1></header>
+    <section className="card glass" style={{ marginBottom: 16 }}><div className="row between" style={{ marginBottom: 0 }}><b>{n} von {meals.length} Mahlzeiten geloggt</b><span className="muted">{pct} %</span></div>
+      <div className="bar"><i style={{ width: pct + '%' }} /></div></section>
+    {[...meals].sort((a, b) => a.time.localeCompare(b.time)).map(x => { const on = mine.includes(x.id); return (
+      <div key={x.id} className="pcard" style={{ marginBottom: 10 }}><span className="micon">{mealIcon(x.t)}</span>
+        <div className="ev-main"><b className={on ? 'strike' : ''}>{x.t}</b><span className="muted">{x.time} Uhr</span></div>
+        <button className={'box' + (on ? ' on' : '')} aria-pressed={on} aria-label={x.t + ' geloggt'} onClick={() => toggle(x.id)}>{on ? '✓' : ''}</button>
+        <button className="x" aria-label="Mahlzeit löschen" onClick={() => setMeals(meals.filter(m => m.id !== x.id))}>✕</button></div>); })}
+    <section className="card glass" style={{ marginTop: 16 }}><h2>Feste Mahlzeit (jeden Tag)</h2><p className="muted small" style={{ marginBottom: 8 }}>Erscheint ab jetzt jeden Tag in der Checkliste. Für einmalige Snacks nutze „Schnell eintragen“ weiter unten.</p>
+      <div className="row" style={{ flexWrap: 'wrap' }}><input className="inp" placeholder="z. B. Pre-Workout Snack" value={f.t} onChange={e => setF({ ...f, t: e.target.value })} />
+        <input className="inp" type="time" style={{ flex: '0 0 auto', width: 'auto' }} value={f.time} onChange={e => setF({ ...f, time: e.target.value })} /><button className="btn" onClick={add}>Hinzufügen</button></div></section>
+  </>);
+}
+const PRIO = { hoch: '#ff6b9d', mittel: '#fbbf24', niedrig: '#60a5fa' };
+const occurs = (t, d) => t.repeat === 'daily' ? d >= t.date : t.repeat === 'weekly' ? d >= t.date && new Date(d + 'T12:00').getDay() === new Date(t.date + 'T12:00').getDay() : t.date === d;
+const DEFAULT_ROUT = { morning: [{ id: 1, t: 'Aufstehen & Wasser trinken' }, { id: 2, t: 'Mobility, 5 Minuten' }, { id: 3, t: 'Frühstück + Shake' }], evening: [{ id: 11, t: 'Tasche für morgen packen' }, { id: 12, t: 'Dehnen / Foam Rolling' }, { id: 13, t: 'Handy weglegen' }] };
+function Tasks() {
+  const [tasks, setTasks] = useLocalStorage('th.tasks', []);
+  const [rout, setRout] = useLocalStorage('th.routines', DEFAULT_ROUT);
+  const [rd, setRd] = useLocalStorage('th.routdone', {});
+  const [evs] = useLocalStorage('th.events', []); const [planD] = useLocalStorage('th.plan', {});
+  const [fd, setFd] = useState({ title: '', deadline: '', hours: '3', len: '60', prio: 'hoch' });
+  const [msg, setMsg] = useState('');
+  const today = dstr(new Date()), tdow = (new Date().getDay() + 6) % 7;
+  const [tab, setTab] = useState('Heute');
+  const [f, setF] = useState({ title: '', date: today, time: '', prio: 'mittel', repeat: 'none' });
+  const [rt, setRt] = useState({ morning: '', evening: '' });
+  const rank = { hoch: 0, mittel: 1, niedrig: 2 };
+  const dayTasks = d => tasks.filter(t => occurs(t, d)).sort((a, b) => (a.time || '99').localeCompare(b.time || '99') || rank[a.prio] - rank[b.prio]);
+  const overdue = tasks.filter(t => t.repeat === 'none' && t.date < today && !(t.doneOn || []).length);
+  const toggleT = (t, d) => setTasks(tasks.map(x => x.id === t.id ? { ...x, doneOn: (x.doneOn || []).includes(d) ? x.doneOn.filter(y => y !== d) : [...(x.doneOn || []), d] } : x));
+  const add = () => { if (f.title.trim()) { setTasks([...tasks, { id: Date.now(), title: f.title.trim(), date: f.date || today, time: f.time, prio: f.prio, repeat: f.repeat, doneOn: [] }]); setF({ ...f, title: '' }); } };
+  const row = (t, d) => { const on = (t.doneOn || []).includes(d); return (
+    <div key={t.id + d} className="pcard" style={{ marginBottom: 8, '--c': PRIO[t.prio] }}><span className="stripe" />
+      <div className="ev-main"><b className={on ? 'strike' : ''}>{t.title}</b><span className="muted">{t.time ? t.time + (t.end ? '–' + t.end : '') + ' · ' : ''}{t.prio}{t.deadline ? ' · Frist ' + deDate(t.deadline) : ''}{t.repeat === 'daily' ? ' · täglich' : t.repeat === 'weekly' ? ' · wöchentlich' : ''}</span></div>
+      <button className={'box' + (on ? ' on' : '')} aria-pressed={on} aria-label={t.title + ' abhaken'} onClick={() => toggleT(t, d)}>{on ? '✓' : ''}</button>
+      <button className="x" aria-label="Aufgabe löschen" onClick={() => setTasks(tasks.filter(x => x.id !== t.id))}>✕</button></div>); };
+  const week = Array.from({ length: 7 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - tdow + i); return dstr(d); });
+  const form = (<section className="card glass" style={{ marginTop: 16 }}><h2>Neue Aufgabe</h2><div className="form">
+    <input placeholder="z. B. Referat vorbereiten" value={f.title} onChange={e => setF({ ...f, title: e.target.value })} />
+    <div className="row"><input type="date" value={f.date} onChange={e => setF({ ...f, date: e.target.value })} /><input type="time" value={f.time} onChange={e => setF({ ...f, time: e.target.value })} aria-label="Uhrzeit (optional)" /></div>
+    <div className="row"><select value={f.prio} onChange={e => setF({ ...f, prio: e.target.value })}>{Object.keys(PRIO).map(p => <option key={p} value={p}>Priorität: {p}</option>)}</select>
+      <select value={f.repeat} onChange={e => setF({ ...f, repeat: e.target.value })}><option value="none">Einmalig</option><option value="daily">Täglich</option><option value="weekly">Wöchentlich</option></select></div>
+    <button className="btn" onClick={add}>Aufgabe speichern</button></div></section>);
+  // Frist-Aufgabe: verteilt den Aufwand in freie Zeitblöcke vor der Frist (Mo–Fr 14:00–21:30, Sa/So 09:00–21:00)
+  const autoPlan = () => {
+    const title = fd.title.trim(); setMsg('');
+    if (!title || !fd.deadline) return setMsg('Bitte Titel und Frist angeben.');
+    if (fd.deadline < today) return setMsg('Die Frist liegt in der Vergangenheit.');
+    const len = +fd.len, n = Math.ceil(+fd.hours * 60 / len), nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+    const days = [], cur = new Date(); cur.setHours(12, 0, 0, 0);
+    while (dstr(cur) < fd.deadline) { days.push(dstr(cur)); cur.setDate(cur.getDate() + 1); }
+    if (!days.length) days.push(fd.deadline);
+    const busy = {};
+    days.forEach(d => { const dow = (new Date(d + 'T12:00').getDay() + 6) % 7;
+      busy[d] = [...evs.filter(e => e.date === d).map(e => [toM(e.start), toM(e.end)]), ...(planD[dow] || []).map(i => [toM(i.start), toM(i.end)]), ...tasks.filter(t => t.time && occurs(t, d)).map(t => [toM(t.time), t.end ? toM(t.end) : toM(t.time) + 60])]; });
+    const slotIn = d => { const wk = (new Date(d + 'T12:00').getDay() + 6) % 7 >= 5; let ws = wk ? 540 : 840; const we = wk ? 1260 : 1290;
+      if (d === today) ws = Math.max(ws, Math.ceil((nowMin + 15) / 15) * 15);
+      for (let s = ws; s + len <= we; s += 15) if (!busy[d].some(([a, b]) => s < b + 10 && a < s + len + 10)) return s;
+      return null; };
+    const usage = {}, placed = [];
+    for (let i = 0; i < n; i++) {
+      const target = Math.floor((i + 0.5) * days.length / n);
+      const order = days.map((d, idx) => [d, idx]).sort((a, b) => ((usage[a[0]] || 0) * 100 + Math.abs(a[1] - target)) - ((usage[b[0]] || 0) * 100 + Math.abs(b[1] - target)));
+      for (const [d] of order) { const s = slotIn(d); if (s !== null) { busy[d].push([s, s + len]); usage[d] = (usage[d] || 0) + 1; placed.push({ d, s }); break; } }
+    }
+    if (!placed.length) return setMsg('Vor der Frist ist keine freie Zeit mehr. Verschiebe die Frist oder schaffe Platz.');
+    placed.sort((a, b) => (a.d + fmt(a.s)).localeCompare(b.d + fmt(b.s)));
+    setTasks([...tasks, ...placed.map((p, i) => ({ id: Date.now() + i, title: title + ' (' + (i + 1) + '/' + placed.length + ')', date: p.d, time: fmt(p.s), end: fmt(p.s + len), prio: fd.prio, repeat: 'none', doneOn: [], deadline: fd.deadline }))]);
+    setMsg((placed.length === n ? n + ' Blöcke eingeplant: ' : 'Nur ' + placed.length + ' von ' + n + ' Blöcken passen vor die Frist: ') + placed.map(p => deDate(p.d) + ' ' + fmt(p.s)).join(', '));
+    setFd({ ...fd, title: '' });
+  };
+  const autoForm = (<section className="card glass" style={{ marginTop: 16 }}><h2>Aufgabe mit Frist</h2><p className="muted small">Die App legt den Aufwand automatisch in freie Zeitlücken vor der Frist.</p><div className="form">
+    <input placeholder="z. B. Referat" value={fd.title} onChange={e => setFd({ ...fd, title: e.target.value })} />
+    <div className="row"><span className="muted">Frist:</span><input type="date" value={fd.deadline} onChange={e => setFd({ ...fd, deadline: e.target.value })} /></div>
+    <div className="row"><select value={fd.hours} onChange={e => setFd({ ...fd, hours: e.target.value })}>{['1', '2', '3', '4', '6', '8'].map(h => <option key={h} value={h}>{h} Std. Aufwand</option>)}</select>
+      <select value={fd.len} onChange={e => setFd({ ...fd, len: e.target.value })}>{['30', '45', '60', '90'].map(l => <option key={l} value={l}>Blöcke à {l} Min.</option>)}</select></div>
+    <button className="btn" onClick={autoPlan}>Automatisch einplanen</button>
+    {msg && <p className="muted" role="status">{msg}</p>}</div></section>);
+  return (<>
+    <header className="hero"><p className="muted">{deDate(today)}</p><h1>Aufgaben</h1></header>
+    <div className="tabs">{['Heute', 'Woche', 'Routinen'].map(t => <button key={t} className={'btn ghost' + (tab === t ? ' act' : '')} onClick={() => setTab(t)}>{t}</button>)}</div>
+    {tab === 'Heute' && <>
+      {overdue.length > 0 && <><p className="err">Überfällig</p>{overdue.map(t => row(t, t.date))}</>}
+      {dayTasks(today).length ? dayTasks(today).map(t => row(t, today)) : <p className="muted">Heute stehen keine Aufgaben an.</p>}{autoForm}{form}</>}
+    {tab === 'Woche' && <>{week.map((d, i) => <div key={d} style={{ marginBottom: 14 }}><h2 style={{ fontSize: '.9rem', fontWeight: 700, color: d === today ? 'var(--accent)' : 'var(--muted)' }}>{WD[i]} · {deDate(d)}</h2>
+      {dayTasks(d).length ? dayTasks(d).map(t => row(t, d)) : <p className="muted small">Nichts geplant.</p>}</div>)}{autoForm}{form}</>}
+    {tab === 'Routinen' && [['morning', 'Morgenroutine'], ['evening', 'Abendroutine']].map(([k, name]) => { const list = rout[k], mine = rd[today + k] || [];
+      const tog = id => setRd({ ...rd, [today + k]: mine.includes(id) ? mine.filter(x => x !== id) : [...mine, id] });
+      return (<section key={k} className="card glass" style={{ marginBottom: 16 }}><h2>{name}</h2><p className="muted">{list.filter(i => mine.includes(i.id)).length} von {list.length} erledigt</p>
+        {list.map(i => (<div key={i.id} className="chk"><button className={'box' + (mine.includes(i.id) ? ' on' : '')} aria-pressed={mine.includes(i.id)} aria-label={i.t} onClick={() => tog(i.id)}>{mine.includes(i.id) ? '✓' : ''}</button>
+          <span className={mine.includes(i.id) ? 'muted' : ''}>{i.t}</span><button className="x" aria-label="Punkt löschen" onClick={() => setRout({ ...rout, [k]: list.filter(x => x.id !== i.id) })}>✕</button></div>))}
+        <div className="row" style={{ marginTop: 12 }}><input className="inp" placeholder="Neuer Punkt" value={rt[k]} onChange={e => setRt({ ...rt, [k]: e.target.value })} />
+          <button className="btn" onClick={() => { if (rt[k].trim()) { setRout({ ...rout, [k]: [...list, { id: Date.now(), t: rt[k].trim() }] }); setRt({ ...rt, [k]: '' }); } }}>Hinzufügen</button></div></section>); })}
+  </>);
+}
+const MUSCLES = ['Brust', 'Rücken', 'Beine', 'Schultern', 'Arme', 'Core', 'Ganzkörper'];
+const DEF_EX = [{ id: 1, n: 'Bankdrücken', m: 'Brust' }, { id: 2, n: 'Kniebeuge', m: 'Beine' }, { id: 3, n: 'Kreuzheben', m: 'Rücken' }, { id: 4, n: 'Schulterdrücken', m: 'Schultern' }, { id: 5, n: 'Klimmzüge', m: 'Rücken' }, { id: 6, n: 'Bizeps-Curls', m: 'Arme' }, { id: 7, n: 'Trap-Bar-Kreuzheben', m: 'Rücken' }];
+// Tage mit erfassten Gym-Sätzen zählen automatisch als Gym-Training
+const gymDays = () => { try { return [...new Set(JSON.parse(localStorage.getItem('th.gym') || '[]').map(s => s.date))].map(d => ({ id: 'g' + d, date: d, cat: 'Gym', title: 'Gym', start: '00:00', end: '00:00' })); } catch (e) { return []; } };
+const fmtN = n => String(Math.round(n * 10) / 10).replace('.', ',');
+function Gym() {
+  const [ex, setEx] = useLocalStorage('th.gymex', DEF_EX);
+  const [log, setLog] = useLocalStorage('th.gym', []);
+  const today = dstr(new Date());
+  const [sel, setSel] = useState(String(ex[0] ? ex[0].id : ''));
+  const [kg, setKg] = useState(''); const [reps, setReps] = useState('');
+  const [nx, setNx] = useState({ n: '', m: 'Brust' });
+  const [rest, setRest] = useState(0); const [flash, setFlash] = useState('');
+  useEffect(() => { if (rest <= 0) return; const t = setTimeout(() => setRest(r => r - 1), 1000); return () => clearTimeout(t); }, [rest]);
+  const cur = ex.find(e => String(e.id) === sel) || ex[0];
+  const e1 = (k, r) => k * (1 + r / 30);
+  const save = () => { const w = parseFloat(kg.replace(',', '.')), r = parseInt(reps, 10); if (!cur || !(w >= 0) || !(r > 0)) return;
+    const prev = log.filter(s => s.ex === cur.id);
+    if (prev.length) { const pm = Math.max(...prev.map(s => s.kg)), pe = Math.max(...prev.map(s => e1(s.kg, s.reps)));
+      if (w > pm) setFlash('📈 Neues Max! ' + cur.n + ': ' + fmtN(w) + ' kg × ' + r + ' (+' + fmtN(w - pm) + ' kg)');
+      else if (e1(w, r) > pe + 0.05) setFlash('📈 Neue Bestleistung! ' + cur.n + ': geschätztes 1RM ' + fmtN(e1(w, r)) + ' kg'); }
+    setLog([...log, { id: Date.now(), date: today, ex: cur.id, kg: w, reps: r }]); setReps(''); setRest(90); };
+  const mine = cur ? log.filter(s => s.ex === cur.id) : [];
+  const dates = [...new Set(mine.map(s => s.date))].sort();
+  const sess = d => mine.filter(s => s.date === d), top = d => Math.max(...sess(d).map(s => s.kg));
+  const vol = l => l.reduce((a, s) => a + s.kg * s.reps, 0);
+  const pr = mine.length ? mine.reduce((b, s) => s.kg > b.kg || (s.kg === b.kg && s.reps > b.reps) ? s : b) : null;
+  let tip = 'Starte mit einem leichten Gewicht und trag deine Sätze ein.';
+  if (dates.length) { const last = dates[dates.length - 1], mx = top(last), atMax = sess(last).filter(s => s.kg === mx);
+    tip = atMax.every(s => s.reps >= 8) ? 'Alle Sätze mit ' + fmtN(mx) + ' kg über 8 Wdh. geschafft. Nächstes Mal: ' + fmtN(mx + 2.5) + ' kg.' : 'Bleib bei ' + fmtN(mx) + ' kg und peile 8 Wdh. in jedem Satz an.'; }
+  const W = 300, H = 90, vals = dates.map(top), lo = Math.min(...vals), hi = Math.max(...vals);
+  const px = i => i * (W - 20) / (dates.length - 1) + 10, py = v => hi === lo ? H / 2 : H - 10 - (v - lo) / (hi - lo) * (H - 20);
+  const todayLog = log.filter(s => s.date === today);
+  const records = (<section className="card glass" style={{ marginTop: 16 }}><h2>Rekorde &amp; Trend</h2>
+    {ex.filter(e => log.some(s => s.ex === e.id)).map(e => { const l = log.filter(s => s.ex === e.id), ds = [...new Set(l.map(s => s.date))].sort(), tp = d => Math.max(...l.filter(s => s.date === d).map(s => s.kg)), b = l.reduce((a, s) => s.kg > a.kg || (s.kg === a.kg && s.reps > a.reps) ? s : a), orm = Math.max(...l.map(s => e1(s.kg, s.reps))), diff = ds.length > 1 ? tp(ds[ds.length - 1]) - tp(ds[ds.length - 2]) : null;
+      return (<div key={e.id} className="note row between" style={{ marginBottom: 0 }}><span><b>{e.n}</b><br /><span className="muted small">Max {fmtN(b.kg)} kg × {b.reps} · 1RM ≈ {fmtN(orm)} kg</span></span><b style={{ color: diff === null ? 'var(--muted)' : diff >= 0 ? 'var(--accent)' : '#ff8fab' }}>{diff === null ? '–' : (diff > 0 ? '📈 +' : diff < 0 ? '📉 ' : '➖ ') + fmtN(diff) + ' kg'}</b></div>); })}
+    {!log.length && <p className="muted">Sobald du Sätze einträgst, siehst du hier Rekorde und den Trend jeder Übung.</p>}</section>);
+  return (<>
+    <header className="hero"><p className="muted">{deDate(today)}</p><h1>Gym</h1></header><Flash msg={flash} onDone={() => setFlash('')} />
+    <div className="cal-wrap">
+      <section className="card glass"><h2>Satz erfassen</h2><div className="form">
+        <select value={sel} onChange={e => setSel(e.target.value)} aria-label="Übung">{ex.map(e => <option key={e.id} value={e.id}>{e.n} ({e.m})</option>)}</select>
+        <div className="row"><input className="inp" inputMode="decimal" placeholder="kg" value={kg} onChange={e => setKg(e.target.value)} /><span className="muted">×</span><input className="inp" inputMode="numeric" placeholder="Wdh." value={reps} onChange={e => setReps(e.target.value)} /></div>
+        <button className="btn" onClick={save}>Satz speichern</button>
+        <div className="row"><span className="muted">Pause:</span>{[60, 90, 120].map(s => <button key={s} className="btn ghost" onClick={() => setRest(s)}>{s} s</button>)}</div>
+        {rest > 0 && <p><b className="big" style={{ fontSize: '2rem' }}>{pad(Math.floor(rest / 60))}:{pad(rest % 60)}</b> <button className="x" onClick={() => setRest(0)}>Stopp</button></p>}</div>
+        <h2 style={{ marginTop: 18 }}>Heute</h2>
+        {todayLog.length ? [...new Set(todayLog.map(s => s.ex))].map(id => { const l = todayLog.filter(s => s.ex === id), e = ex.find(x => x.id === id); return (<div key={id} className="note"><b>{e ? e.n : 'Übung'}</b> <span className="muted">Volumen {fmtN(vol(l))} kg</span><div>{l.map(s => <button key={s.id} className="chip" aria-label="Satz löschen" onClick={() => setLog(log.filter(x => x.id !== s.id))}>{fmtN(s.kg)} × {s.reps} ✕</button>)}</div></div>); }) : <p className="muted">Noch keine Sätze heute. Ein Tag mit Sätzen zählt als Gym-Training.</p>}
+      </section>
+      <section className="card glass"><h2>Fortschritt: {cur ? cur.n : '–'}</h2>
+        {pr ? <p>Bestleistung: <b>{fmtN(pr.kg)} kg × {pr.reps}</b></p> : <p className="muted">Noch keine Daten.</p>}
+        <p className="muted" style={{ margin: '6px 0 10px' }}>Tipp: {tip}</p>
+        {dates.length > 1 ? <svg viewBox={'0 0 ' + W + ' ' + H} className="chart" role="img" aria-label="Verlauf der Top-Gewichte"><polyline points={vals.map((v, i) => px(i) + ',' + py(v)).join(' ')} fill="none" stroke="var(--accent)" strokeWidth="2.5" />{vals.map((v, i) => <circle key={i} cx={px(i)} cy={py(v)} r="4" fill="var(--accent)" />)}</svg> : <p className="muted small">Das Diagramm erscheint ab der zweiten Einheit.</p>}
+        {dates.slice(-5).reverse().map(d => <div key={d} className="note"><b>{deDate(d)}</b> <span className="muted">Volumen {fmtN(vol(sess(d)))} kg</span><p className="muted">{sess(d).map(s => fmtN(s.kg) + '×' + s.reps).join(' · ')}</p></div>)}
+        <h2 style={{ marginTop: 18 }}>Eigene Übung</h2><div className="form"><input placeholder="z. B. Schrägbankdrücken" value={nx.n} onChange={e => setNx({ ...nx, n: e.target.value })} />
+          <select value={nx.m} onChange={e => setNx({ ...nx, m: e.target.value })}>{MUSCLES.map(m => <option key={m}>{m}</option>)}</select>
+          <button className="btn" onClick={() => { if (nx.n.trim()) { const id = Date.now(); setEx([...ex, { id, n: nx.n.trim(), m: nx.m }]); setSel(String(id)); setNx({ ...nx, n: '' }); } }}>Übung hinzufügen</button></div>
+      </section>
+    </div>{records}</>);
+}
+const EQUIP = ['Langhantel', 'Kurzhanteln', 'Kettlebells', 'Beinpresse', 'Klimmzugstange', 'Medizinball', 'Stoppuhr', 'Speed Ladder', 'Ab Wheel', 'Widerstandsbänder'];
+function Profile({ onOpen }) {
+  const [name, setName] = useLocalStorage('th.name', DEFAULT_USER);
+  const [p, setP] = useLocalStorage('th.profile', {});
+  const [events] = useLocalStorage('th.events', []); const [plan] = useLocalStorage('th.plan', {}); const [pd] = useLocalStorage('th.plandone', {});
+  const [dItems] = useLocalStorage('th.checks', DEFAULT_CHECKS); const [dCd] = useLocalStorage('th.checkdone', {}); const [mDone] = useLocalStorage('th.mealdone', {});
+  const [gym] = useLocalStorage('th.gym', []);
+  const set = k => e => setP({ ...p, [k]: e.target.value });
+  const F = (l, k, num) => <label className="fld"><span className="muted small">{l}</span><input className="inp" inputMode={num ? 'decimal' : undefined} value={p[k] || ''} onChange={set(k)} /></label>;
+  const done = doneAll(events, plan, pd, dItems, dCd);
+  const sum = o => Object.values(o).reduce((s, a) => s + a.length, 0);
+  const xp = sum(dCd) * 10 + sum(mDone) * 10 + done.length * 50, level = Math.floor(xp / 400) + 1;
+  const mins = done.reduce((s, e) => s + toM(e.end) - toM(e.start), 0);
+  const gain = [...new Set(gym.map(s => s.ex))].reduce((a, id) => { const l = gym.filter(s => s.ex === id), ds = [...new Set(l.map(s => s.date))].sort(); return a + Math.max(...l.map(s => s.kg)) - Math.max(...l.filter(s => s.date === ds[0]).map(s => s.kg)); }, 0);
+  const eq = p.equip || [];
+  const stat = (v, l) => <div className="card glass" style={{ minHeight: 0, textAlign: 'center' }}><div className="big">{v}</div><span className="muted small">{l}</span></div>;
+  return (<>
+    <header className="hero row" style={{ gap: 16 }}><div className="avatar">{(name || '?').slice(0, 1).toUpperCase()}</div>
+      <div style={{ flex: 1 }}><input className="inp" style={{ fontSize: '1.5rem', fontWeight: 700 }} aria-label="Name" value={name} onChange={e => setName(e.target.value)} />{F('Jahrgang / Class of', 'cls')}</div></header>
+    <section className="card glass" style={{ marginBottom: 16, cursor: 'pointer' }} role="button" tabIndex={0} onClick={onOpen} onKeyDown={e => e.key === 'Enter' && onOpen()}><div className="lvl"><div className="ring">{level}</div><div style={{ flex: 1 }}><b>{RANKS[Math.min(level - 1, RANKS.length - 1)]}</b><p className="muted">{xp} XP gesammelt · Tippen für Ranglisten ›</p></div></div></section>
+    <h2 className="hero" style={{ padding: '0 4px 10px', fontStyle: 'italic', textTransform: 'uppercase' }}>All-Time Stats</h2>
+    <div className="stat4">{stat(done.length, 'Workouts')}{stat(mins, 'Minuten')}{stat(done.filter(e => e.cat === 'Gym').length, 'Gym')}{stat(done.filter(e => e.cat === 'Football Field Session').length, 'Field')}</div>
+    <section className="card glass" style={{ margin: '12px 0 16px', minHeight: 0 }}><div className="row between" style={{ marginBottom: 0 }}><span className="muted">Kraftzuwachs</span><b className="big" style={{ fontSize: '1.8rem' }}>{fmtN(gain)} kg</b></div></section>
+    <section className="card glass" style={{ marginBottom: 16 }}><h2>Körper & Infos</h2><div className="pgrid">{F('Alter', 'age', 1)}{F('Größe (cm)', 'h', 1)}{F('Gewicht (kg)', 'w', 1)}{F('Land', 'land')}{F('Schule', 'school')}{F('Position', 'pos')}</div></section>
+    <section className="card glass" style={{ marginBottom: 16 }}><h2>Combine</h2><div className="pgrid">{F('Hang Clean (kg)', 'clean', 1)}{F('Back Squat (kg)', 'squat', 1)}{F('40-Yard-Dash (s)', 'dash', 1)}{F('Weitsprung (m)', 'jump', 1)}</div></section>
+    <section className="card glass" style={{ marginBottom: 16 }}><h2>Connect</h2><div className="pgrid">{F('Instagram', 'ig')}{F('TikTok', 'tt')}</div></section>
+    <CloudCard /><HealthCard /><section className="card glass"><h2>Equipment</h2><div>{EQUIP.map(q => <button key={q} className={'chip' + (eq.includes(q) ? ' on' : '')} aria-pressed={eq.includes(q)} onClick={() => setP({ ...p, equip: eq.includes(q) ? eq.filter(x => x !== q) : [...eq, q] })}>{q}</button>)}</div></section>
+  </>);
+}
+// Hall of Fame: gemeinsames Ranking über die db-Capability (nur wer beitritt, steht in der Liste)
+function Board({ mode = 'list', onHof, onBack }) {
+  const [name] = useLocalStorage('th.name', DEFAULT_USER);
+  const [join, setJoin] = useLocalStorage('th.joinboard', false);
+  const [events] = useLocalStorage('th.events', []); const [plan] = useLocalStorage('th.plan', {}); const [pd] = useLocalStorage('th.plandone', {});
+  const [dItems] = useLocalStorage('th.checks', DEFAULT_CHECKS); const [dCd] = useLocalStorage('th.checkdone', {}); const [mDone] = useLocalStorage('th.mealdone', {});
+  const sum = o => Object.values(o).reduce((s, a) => s + a.length, 0);
+  const xp = sum(dCd) * 10 + sum(mDone) * 10 + doneAll(events, plan, pd, dItems, dCd).length * 50, level = Math.floor(xp / 400) + 1;
+  const [rows, setRows] = useState([]); const [state, setState] = useState('loading'); const [me, setMe] = useState(null);
+  const dbRef = useRef(null);
+  useEffect(() => {
+    let dead = false;
+    const load = async () => {
+      if (!sb) return setState('off');
+      const { data, error } = await sb.from('board').select('user_id,name,xp,level').order('xp', { ascending: false }).limit(50);
+      if (dead) return; if (error) return setState('off');
+      setRows((data || []).map(r => ({ uid: r.user_id, name: r.name, xp: r.xp, level: r.level }))); setState('ready');
+    };
+    setMe(cloud.user ? cloud.user.id : null); load();
+    const t = setInterval(load, 15000);
+    return () => { dead = true; clearInterval(t); };
+  }, []);
+  useEffect(() => {
+    if (!join || !me || !sb) return;
+    sb.from('board').upsert({ user_id: me, name: (name || DEFAULT_USER).slice(0, 24), xp, level, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }).then(() => {});
+  }, [join, me, xp, name, level]);
+  const leave = () => { setJoin(false); if (sb && me) sb.from('board').delete().eq('user_id', me).then(() => {}); };
+  const medal = i => ['🥇', '🥈', '🥉'][i] || '#' + (i + 1);
+  const myPos = rows.findIndex(r => r.uid === me);
+  return (<>
+    <header className="hero">{onBack && <button className="btn ghost" onClick={onBack} style={{ marginBottom: 10 }}>‹ Zurück</button>}<p className="muted">{mode === 'tiers' ? 'Alle Spieler nach Rang' : 'Rang nach XP'}</p><h1>{mode === 'tiers' ? 'Ränge' : 'Hall of Fame'}</h1></header>
+    <section className="card glass" style={{ marginBottom: 16 }}><div className="lvl"><div className="ring">{level}</div><div style={{ flex: 1 }}><b>{RANKS[Math.min(level - 1, RANKS.length - 1)]}</b><p className="muted">{xp} XP{myPos >= 0 ? ' · Platz ' + (myPos + 1) : ''}</p></div>
+      {state === 'ready' && (join ? <button className="btn ghost" onClick={leave}>Austreten</button> : <button className="btn" onClick={() => setJoin(true)}>Beitreten</button>)}</div></section>
+    {state === 'loading' && <p className="muted">Ranking wird geladen…</p>}
+    {state === 'off' && <p className="muted" role="status">Das Ranking ist gerade nicht erreichbar. Prüfe deine Internetverbindung und ob du angemeldet bist.</p>}
+    {state === 'ready' && mode === 'tiers' && RANKS.map((rk, ri) => ({ rk, ri })).reverse().map(({ rk, ri }) => { const us = rows.filter(r => Math.min(r.level - 1, RANKS.length - 1) === ri), hof = ri === RANKS.length - 1; return (<section key={rk} className={'card glass' + (hof ? ' hofcard' : '')} style={{ marginBottom: 12, cursor: hof ? 'pointer' : undefined }} role={hof ? 'button' : undefined} tabIndex={hof ? 0 : undefined} onClick={hof ? onHof : undefined}><div className="row between" style={{ marginBottom: 6 }}><b>{rk}</b><span className="muted small">{us.length} Spieler{hof ? ' · Rangliste ›' : ''}</span></div>{us.length ? <p className="muted">{us.map(u => u.name + (u.uid === me ? ' (du)' : '')).join(', ')}</p> : <p className="muted small">Noch niemand</p>}</section>); })}
+    {state === 'ready' && mode !== 'tiers' && (rows.length ? rows.map((r, i) => (<div key={r.uid} className="pcard" style={{ marginBottom: 8, '--c': r.uid === me ? 'var(--accent)' : '#94a3b8' }}><span className="stripe" />
+      <b style={{ width: 44 }}>{medal(i)}</b><div className="ev-main"><b>{r.name}{r.uid === me ? ' (du)' : ''}</b><span className="muted">{RANKS[Math.min(r.level - 1, RANKS.length - 1)]} · Level {r.level}</span></div><b>{r.xp} XP</b></div>)) : <p className="muted">Noch niemand im Ranking. Tritt bei und sei die Nummer 1.</p>)}
+    {state === 'ready' && !join && <p className="muted small">Mit Beitreten werden dein Name und deine XP für alle sichtbar, die die Seite öffnen. Du kannst jederzeit wieder austreten.</p>}
+  </>);
+}
+// Richtwerte pro 100 g: [Name, kcal, Protein, Kohlenhydrate, Fett]
+const FOODS0 = [['Haferflocken', 370, 13, 60, 7], ['Vollmilch', 64, 3.4, 4.8, 3.6], ['Ei', 143, 12.6, .7, 9.9], ['Hähnchenbrust', 110, 23, 0, 1.5], ['Reis (gekocht)', 130, 2.7, 28, .3], ['Nudeln (gekocht)', 158, 5.8, 31, .9], ['Kartoffeln', 77, 2, 17, .1], ['Brokkoli', 34, 2.8, 7, .4], ['Banane', 89, 1.1, 23, .3], ['Apfel', 52, .3, 14, .2], ['Magerquark', 67, 12, 4, .3], ['Skyr', 63, 11, 4, .2], ['Vollkornbrot', 215, 8, 38, 2], ['Olivenöl', 884, 0, 0, 100], ['Proteinpulver', 380, 78, 6, 6], ['Erdnussbutter', 600, 25, 20, 50], ['Thunfisch (Dose)', 116, 26, 0, 1], ['Rinderhack (mager)', 150, 20, 0, 8], ['Lachs', 208, 20, 0, 13], ['Joghurt 3,5 %', 66, 3.5, 4.7, 3.8], ['Avocado', 160, 2, 9, 15], ['Tomate', 18, .9, 3.9, .2], ['Studentenfutter', 470, 13, 38, 30]].map(([n, k, p, c, f]) => ({ n, k, p, c, f }));
+const SLOTS = ['Frühstück', 'Mittagessen', 'Abendessen', 'Snack'];
+const numIn = s => parseFloat(String(s).replace(',', '.')) || 0;
+const nut = (items, foods) => items.reduce((a, i) => { const f = foods.find(x => x.n === i.food); if (!f) return a; const m = i.g / 100; return { k: a.k + f.k * m, p: a.p + f.p * m, c: a.c + f.c * m, f: a.f + f.f * m }; }, { k: 0, p: 0, c: 0, f: 0 });
+const NutLine = ({ n }) => <span className="muted">{Math.round(n.k)} kcal · P {Math.round(n.p)} g · KH {Math.round(n.c)} g · F {Math.round(n.f)} g</span>;
+function Food() {
+  const [tab, setTab] = useState('Heute');
+  return (<><div className="tabs">{['Heute', 'Gerichte', 'Einkauf'].map(t => <button key={t} className={'btn ghost' + (tab === t ? ' act' : '')} onClick={() => setTab(t)}>{t}</button>)}</div>
+    {tab === 'Heute' && <><Meals /><FoodDay /></>}{tab === 'Gerichte' && <Dishes />}{tab === 'Einkauf' && <Shop />}</>);
+}
+function FoodDay() {
+  const [dishes] = useLocalStorage('th.dishes', []); const [cust] = useLocalStorage('th.foods', []);
+  const [log, setLog] = useLocalStorage('th.mlog', {}); const [water, setWater] = useLocalStorage('th.water', {});
+  const [d, setD] = useState(dstr(new Date()));
+  const [q, setQ] = useState({ food: 'Studentenfutter', g: '150', slot: 'Snack' });
+  const foods = [...FOODS0, ...cust], es = log[d] || [], ml = water[d] || 0;
+  const enut = e => { if (e.food) return nut([{ food: e.food, g: e.g }], foods); const dish = dishes.find(x => x.id === e.dish); return dish ? nut(dish.items, foods) : null; };
+  const ename = e => e.food ? e.g + ' g ' + e.food : (dishes.find(x => x.id === e.dish) || {}).name;
+  const quick = () => { const g = numIn(q.g); if (g > 0) setLog({ ...log, [d]: [...es, { id: Date.now(), slot: q.slot, food: q.food, g }] }); };
+  const tot = es.reduce((a, e) => { const n = enut(e); return n ? { k: a.k + n.k, p: a.p + n.p, c: a.c + n.c, f: a.f + n.f } : a; }, { k: 0, p: 0, c: 0, f: 0 });
+  const addW = v => setWater({ ...water, [d]: Math.max(0, ml + v) });
+  return (<>
+    <section className="card glass" style={{ marginTop: 16 }}><h2>Gerichte &amp; Nährwerte</h2><input className="inp" type="date" value={d} onChange={e => setD(e.target.value)} style={{ marginBottom: 10 }} />
+      <p><b>Gesamt:</b> <NutLine n={tot} /></p>
+      {es.length ? SLOTS.map(s => es.filter(e => e.slot === s).map(e => { const en = enut(e); return en ? (<div key={e.id} className="note"><div className="row between" style={{ marginBottom: 0 }}><b>{s}: {ename(e)}</b><button className="x" aria-label="Eintrag löschen" onClick={() => setLog({ ...log, [d]: es.filter(x => x.id !== e.id) })}>✕</button></div><NutLine n={en} /></div>) : null; })) : <p className="muted">Noch keine Gerichte für diesen Tag. Trag welche im Tab Gerichte ein.</p>}</section>
+    <section className="card glass" style={{ marginTop: 16 }}><h2>Schnell eintragen</h2><p className="muted small">Gilt nur für das gewählte Datum oben und kommt nicht in die tägliche Checkliste.</p>
+      <div className="form"><select value={q.food} onChange={e => setQ({ ...q, food: e.target.value })}>{foods.map(x => <option key={x.n}>{x.n}</option>)}</select>
+        <div className="row"><input className="inp" inputMode="decimal" value={q.g} onChange={e => setQ({ ...q, g: e.target.value })} aria-label="Gramm" /><span className="muted">g</span><select value={q.slot} onChange={e => setQ({ ...q, slot: e.target.value })}>{SLOTS.map(s => <option key={s}>{s}</option>)}</select></div>
+        <button className="btn" onClick={quick}>Eintragen</button></div></section>
+    <section className="card glass" style={{ marginTop: 16 }}><h2>Trinken</h2><div className="row between" style={{ marginBottom: 0 }}><b>{(ml / 1000).toFixed(2).replace('.', ',')} von 3 L</b><span className="muted">{Math.min(100, Math.round(ml / 30))} %</span></div>
+      <div className="bar"><i style={{ width: Math.min(100, ml / 30) + '%' }} /></div>
+      <div className="row"><button className="btn ghost" onClick={() => addW(-250)}>−250 ml</button><button className="btn" onClick={() => addW(250)}>+250 ml</button><button className="btn" onClick={() => addW(500)}>+500 ml</button></div></section></>);
+}
+function Dishes() {
+  const [dishes, setDishes] = useLocalStorage('th.dishes', []); const [cust, setCust] = useLocalStorage('th.foods', []);
+  const [log, setLog] = useLocalStorage('th.mlog', {}); const [shop, setShop] = useLocalStorage('th.shop', []);
+  const foods = [...FOODS0, ...cust];
+  const [f, setF] = useState({ name: '', items: [], food: FOODS0[0].n, g: '100' });
+  const [cf, setCf] = useState({ n: '', k: '', p: '', c: '', f: '' });
+  const [tg, setTg] = useState({ date: dstr(new Date()), slot: SLOTS[0] }); const [msg, setMsg] = useState('');
+  const addIng = () => { const g = numIn(f.g); if (g > 0) setF({ ...f, items: [...f.items, { food: f.food, g }] }); };
+  const saveDish = () => { if (!f.name.trim() || !f.items.length) return setMsg('Gib einen Namen und mindestens eine Zutat an.'); setMsg(''); setDishes([...dishes, { id: Date.now(), name: f.name.trim(), fav: false, items: f.items }]); setF({ ...f, name: '', items: [] }); };
+  const addFood = () => { if (cf.n.trim()) { setCust([...cust, { n: cf.n.trim(), k: numIn(cf.k), p: numIn(cf.p), c: numIn(cf.c), f: numIn(cf.f) }]); setCf({ n: '', k: '', p: '', c: '', f: '' }); } };
+  const eat = d => setLog({ ...log, [tg.date]: [...(log[tg.date] || []), { id: Date.now(), dish: d.id, slot: tg.slot }] });
+  const toShop = d => { setShop([...shop, ...d.items.map((i, n) => ({ id: Date.now() + n, t: i.g + ' g ' + i.food, done: false }))]); setMsg('„' + d.name + '“ steht jetzt auf der Einkaufsliste.'); };
+  const sorted = [...dishes].sort((a, b) => (b.fav ? 1 : 0) - (a.fav ? 1 : 0));
+  return (<>
+    <section className="card glass" style={{ marginTop: 16 }}><h2>Neues Gericht</h2><div className="form">
+      <input placeholder="Name, z. B. Protein-Porridge" value={f.name} onChange={e => setF({ ...f, name: e.target.value })} />
+      <div className="row"><select value={f.food} onChange={e => setF({ ...f, food: e.target.value })}>{foods.map(x => <option key={x.n}>{x.n}</option>)}</select><input className="inp" style={{ width: 90, flex: '0 0 auto' }} inputMode="decimal" value={f.g} onChange={e => setF({ ...f, g: e.target.value })} aria-label="Gramm" /><span className="muted">g</span></div>
+      <button className="btn ghost" onClick={addIng}>+ Zutat</button>
+      {f.items.map((i, n) => <div key={n} className="row between" style={{ marginBottom: 0 }}><span>{i.g} g {i.food}</span><button className="x" aria-label="Zutat entfernen" onClick={() => setF({ ...f, items: f.items.filter((_, m) => m !== n) })}>✕</button></div>)}
+      {f.items.length > 0 && <NutLine n={nut(f.items, foods)} />}
+      {msg && <p className="err" role="status">{msg}</p>}<button className="btn" onClick={saveDish}>Gericht speichern</button></div></section>
+    <section className="card glass" style={{ marginTop: 16 }}><h2>Eigenes Lebensmittel (pro 100 g)</h2><div className="form"><input placeholder="Name" value={cf.n} onChange={e => setCf({ ...cf, n: e.target.value })} />
+      <div className="pgrid">{[['k', 'kcal'], ['p', 'Protein g'], ['c', 'KH g'], ['f', 'Fett g']].map(([k, l]) => <input key={k} className="inp" inputMode="decimal" placeholder={l} value={cf[k]} onChange={e => setCf({ ...cf, [k]: e.target.value })} />)}</div><button className="btn ghost" onClick={addFood}>Lebensmittel speichern</button></div>
+      <p className="muted small" style={{ marginTop: 8 }}>Die eingebauten Werte sind gerundete Richtwerte. Prüfe sie bei Bedarf auf der Verpackung.</p></section>
+    <section className="card glass" style={{ marginTop: 16 }}><h2>Eintragen für</h2><div className="row"><input className="inp" type="date" value={tg.date} onChange={e => setTg({ ...tg, date: e.target.value })} /><select value={tg.slot} onChange={e => setTg({ ...tg, slot: e.target.value })}>{SLOTS.map(s => <option key={s}>{s}</option>)}</select></div></section>
+    {sorted.map(d => (<section key={d.id} className="card glass" style={{ marginTop: 16 }}><div className="row between" style={{ marginBottom: 4 }}><b>{d.name}</b><button className="x" aria-pressed={d.fav} aria-label="Favorit" onClick={() => setDishes(dishes.map(x => x.id === d.id ? { ...x, fav: !x.fav } : x))}>{d.fav ? '★' : '☆'}</button></div>
+      <NutLine n={nut(d.items, foods)} /><p className="muted small">{d.items.map(i => i.g + ' g ' + i.food).join(', ')}</p>
+      <div className="row" style={{ flexWrap: 'wrap', marginTop: 8 }}><button className="btn" onClick={() => eat(d)}>Eintragen</button><button className="btn ghost" onClick={() => toShop(d)}>Einkaufsliste</button><button className="btn ghost" onClick={() => setDishes(dishes.filter(x => x.id !== d.id))}>Löschen</button></div></section>))}
+  </>);
+}
+function Shop() {
+  const [shop, setShop] = useLocalStorage('th.shop', []); const [t, setT] = useState('');
+  const add = () => { if (t.trim()) { setShop([...shop, { id: Date.now(), t: t.trim(), done: false }]); setT(''); } };
+  return (<section className="card glass" style={{ marginTop: 16 }}><h2>Einkaufsliste</h2>
+    {shop.length ? shop.map(i => (<div key={i.id} className="chk"><button className={'box' + (i.done ? ' on' : '')} aria-pressed={i.done} aria-label={i.t} onClick={() => setShop(shop.map(x => x.id === i.id ? { ...x, done: !x.done } : x))}>{i.done ? '✓' : ''}</button><span className={i.done ? 'muted strike' : ''}>{i.t}</span><button className="x" aria-label="Entfernen" onClick={() => setShop(shop.filter(x => x.id !== i.id))}>✕</button></div>)) : <p className="muted">Die Liste ist leer.</p>}
+    <div className="row" style={{ marginTop: 12 }}><input className="inp" placeholder="Neuer Artikel" value={t} onChange={e => setT(e.target.value)} onKeyDown={e => e.key === 'Enter' && add()} /><button className="btn" onClick={add}>Hinzufügen</button></div>
+    {shop.some(i => i.done) && <button className="btn ghost" style={{ marginTop: 10 }} onClick={() => setShop(shop.filter(i => !i.done))}>Erledigte löschen</button>}</section>);
+}
+function Brief() {
+  const [name] = useLocalStorage('th.name', DEFAULT_USER);
+  const [events] = useLocalStorage('th.events', []); const [plan] = useLocalStorage('th.plan', {}); const [pd] = useLocalStorage('th.plandone', {}); const [tasks] = useLocalStorage('th.tasks', []);
+  const [dItems] = useLocalStorage('th.checks', DEFAULT_CHECKS); const [dCd] = useLocalStorage('th.checkdone', {});
+  const [log] = useLocalStorage('th.mlog', {}); const [dishes] = useLocalStorage('th.dishes', []); const [cust] = useLocalStorage('th.foods', []); const [water] = useLocalStorage('th.water', {});
+  const [act] = useLocalStorage('th.act', {}); const [slp] = useLocalStorage('th.sleep', {});
+  const [focus, setFocus] = useLocalStorage('th.focus', {}); const [note, setNote] = useLocalStorage('th.recapnote', {});
+  const now = new Date(), today = dstr(now), off = n => { const d = new Date(now); d.setDate(d.getDate() + n); return dstr(d); }, tomorrow = off(1), yest = off(-1);
+  const [tab, setTab] = useState(now.getHours() < 15 ? 'Morgen' : 'Abend');
+  const foods = [...FOODS0, ...cust];
+  const ename = e => e.food ? e.g + ' g ' + e.food : (dishes.find(x => x.id === e.dish) || {}).name;
+  const nutDay = d => (log[d] || []).reduce((a, e) => { const n = nut(e.food ? [{ food: e.food, g: e.g }] : ((dishes.find(x => x.id === e.dish) || {}).items || []), foods); return { k: a.k + n.k, p: a.p + n.p, c: a.c + n.c, f: a.f + n.f }; }, { k: 0, p: 0, c: 0, f: 0 });
+  const agenda = d => { const dow = (new Date(d + 'T12:00').getDay() + 6) % 7; return [
+    ...(plan[dow] || []).map(i => ({ id: 'p' + i.id, start: i.start, end: i.end, title: i.title, cat: i.cat, on: (pd[d] || []).includes(i.id) })),
+    ...events.filter(e => e.date === d).map(e => ({ id: 'e' + e.id, start: e.start, end: e.end, title: e.title, cat: e.cat, on: !!e.done })),
+    ...tasks.filter(t => occurs(t, d)).map(t => ({ id: 't' + t.id, start: t.time || '--:--', end: t.end || '', title: t.title, cat: 'Aufgabe', on: (t.doneOn || []).includes(d) }))].sort((a, b) => a.start.localeCompare(b.start)); };
+  const Row = r => <div key={r.id} className="ev" style={{ '--c': CATS[r.cat] || '#94a3b8' }}><span className="dot" /><div className="ev-main"><b className={r.on ? 'strike' : ''}>{r.title}</b><span className="muted">{r.start}{r.end ? '–' + r.end : ''} · {r.cat}</span></div></div>;
+  const hello = tab === 'Morgen' ? 'Guten Morgen' : 'Guten Abend';
+  const ag = agenda(today), openT = tasks.filter(t => occurs(t, today) && !(t.doneOn || []).includes(today)), overdue = tasks.filter(t => t.repeat === 'none' && t.date < today && !(t.doneOn || []).length);
+  const dOpen = dItems.filter(i => !(dCd[today] || []).includes(i.id));
+  const doneToday = doneAll(events, plan, pd, dItems, dCd).filter(e => e.date === today);
+  const tasksToday = tasks.filter(t => occurs(t, today)), tDone = tasksToday.length - openT.length, dDone = dItems.length - dOpen.length;
+  const agM = agenda(tomorrow);
+  return (<>
+    <header className="hero"><p className="muted">{deDate(today)}</p><h1>{hello}, {name}</h1></header>
+    <div className="tabs">{['Morgen', 'Abend'].map(t => <button key={t} className={'btn ghost' + (tab === t ? ' act' : '')} onClick={() => setTab(t)}>{t === 'Morgen' ? 'Morning Briefing' : 'Evening Recap'}</button>)}</div>
+    {tab === 'Morgen' ? <div className="grid">
+      <Card title="Dein Fokus heute" wide color="#a78bfa"><input className="inp" placeholder="Was ist heute das Wichtigste?" value={focus[today] || ''} onChange={e => setFocus({ ...focus, [today]: e.target.value })} /></Card>
+      <Card title="Tagesplan" wide>{ag.length ? ag.map(Row) : <p className="muted">Für heute ist nichts geplant.</p>}</Card>
+      <Card title="Training heute">{ag.filter(r => WORKOUT(r.cat)).length ? ag.filter(r => WORKOUT(r.cat)).map(Row) : <p className="muted">Kein Training geplant. Ruhetag oder Mobility?</p>}</Card>
+      <Card title="Geplante Mahlzeiten">{(log[today] || []).length ? <>{log[today].map(e => <p key={e.id}><b>{e.slot}:</b> {ename(e)}</p>)}<NutLine n={nutDay(today)} /></> : <p className="muted">Noch nichts geplant. Trag Gerichte unter Ernährung ein.</p>}</Card>
+      <Card title="Offene Aufgaben">{openT.length + overdue.length ? <>{overdue.map(t => <p key={t.id} className="err">Überfällig: {t.title}</p>)}{openT.map(t => <p key={t.id}>{t.time ? t.time + ' · ' : ''}{t.title}</p>)}</> : <p className="muted">Alles erledigt oder nichts offen.</p>}</Card>
+      <Card title="Tagesziele"><p>{dOpen.length} von {dItems.length} Daily-Check-Punkten offen</p>{dOpen.slice(0, 4).map(i => <p key={i.id} className="muted">· {i.t}</p>)}</Card>
+      <Card title="Gestern"><p className="muted">Daily Check: {dItems.filter(i => (dCd[yest] || []).includes(i.id)).length}/{dItems.length} · Wasser: {((water[yest] || 0) / 1000).toFixed(1).replace('.', ',')} L · Schritte: {nf((act[yest] || {}).steps || 0)} · Schlaf: {slp[yest] ? hm(sleepMin(slp[yest].bed, slp[yest].wake)) : '–'}</p><p className="muted small">Schlaf wird unter Schlaf eingetragen.</p></Card>
+    </div> : <div className="grid">
+      <Card title="Heute geschafft" wide color="#a78bfa">
+        <p><b>Training:</b> {doneToday.length ? doneToday.map(e => e.cat).join(', ') : 'noch nichts abgeschlossen'}</p>
+        <p><b>Aufgaben:</b> {tDone} von {tasksToday.length} · <b>Tagesplan:</b> {ag.filter(r => r.on).length} von {ag.length} · <b>Daily Check:</b> {dDone} von {dItems.length}</p></Card>
+      <Card title="Ernährung & Trinken"><NutLine n={nutDay(today)} /><p className="muted">Wasser: {((water[today] || 0) / 1000).toFixed(2).replace('.', ',')} von 3 L</p></Card>
+      <Card title="Noch offen">{openT.length + dOpen.length ? <>{openT.map(t => <p key={t.id}>{t.title}</p>)}{dOpen.map(i => <p key={i.id} className="muted">· {i.t}</p>)}</> : <p className="muted">Alles erledigt. Stark.</p>}</Card>
+      <Card title="Morgen" wide>{agM.length ? agM.map(Row) : <p className="muted">Für morgen ist noch nichts geplant.</p>}{agM.find(r => WORKOUT(r.cat)) && <p className="muted small" style={{ marginTop: 8 }}>Morgen steht Training an. Pack deine Tasche heute Abend.</p>}</Card>
+      <Card title="Ein Satz zum Tag" wide><input className="inp" placeholder="Wie lief der Tag?" value={note[today] || ''} onChange={e => setNote({ ...note, [today]: e.target.value })} /></Card>
+    </div>}
+  </>);
+}
+const ACT_GOAL = { steps: 10000, km: 8, min: 60 };
+const nf = n => Math.round(n).toLocaleString('de-DE');
+const addD = (s, n) => { const x = new Date(s + 'T12:00'); x.setDate(x.getDate() + n); return dstr(x); };
+const kmOf = a => a ? (a.km > 0 ? a.km : (a.steps || 0) * 0.00075) : 0;
+function Ring({ pct, size = 150, big, sub }) {
+  const r = size / 2 - 12, c = 2 * Math.PI * r, p = Math.min(1, Math.max(0, pct));
+  return (<svg width={size} height={size} viewBox={'0 0 ' + size + ' ' + size} role="img" aria-label={Math.round(pct * 100) + ' Prozent des Tagesziels'}>
+    <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="13" />
+    <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--accent)" strokeWidth="13" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - p)} transform={'rotate(-90 ' + size / 2 + ' ' + size / 2 + ')'} style={{ filter: 'drop-shadow(0 0 7px var(--accent))', transition: 'stroke-dashoffset .6s' }} />
+    <text x="50%" y="49%" textAnchor="middle" fill="#fff" fontSize="26" fontWeight="700">{big}</text><text x="50%" y="63%" textAnchor="middle" fill="#9aa3b2" fontSize="11">{sub}</text></svg>);
+}
+function Trend({ vals, goal }) {
+  const W = 320, H = 110, n = vals.length;
+  if (n < 2) return <p className="muted small">Der Trend erscheint ab dem zweiten Tag.</p>;
+  const mx = Math.max(goal, ...vals, 1) * 1.1, x = i => 10 + i * (W - 20) / (n - 1), y = v => H - 10 - v / mx * (H - 20);
+  const avg = vals.map((_, i) => { const s = vals.slice(Math.max(0, i - 6), i + 1); return s.reduce((a, b) => a + b, 0) / s.length; });
+  return (<svg viewBox={'0 0 ' + W + ' ' + H} className="chart" role="img" aria-label="Schrittverlauf mit 7-Tage-Schnitt"><line x1="10" x2={W - 10} y1={y(goal)} y2={y(goal)} stroke="rgba(255,255,255,.25)" strokeDasharray="4 4" />
+    <polyline points={vals.map((v, i) => x(i) + ',' + y(v)).join(' ')} fill="none" stroke="rgba(167,139,250,.45)" strokeWidth="2" />
+    <polyline points={avg.map((v, i) => x(i) + ',' + y(v)).join(' ')} fill="none" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>);
+}
+function Activity() {
+  const [act, setAct] = useLocalStorage('th.act', {});
+  const [goal, setGoal] = useLocalStorage('th.actgoal', ACT_GOAL);
+  const today = dstr(new Date()), tdow = (new Date().getDay() + 6) % 7;
+  const [tab, setTab] = useState('Heute'); const [d, setD] = useState(today); const [woff, setWoff] = useState(0);
+  const [f, setF] = useState({ steps: '', km: '', min: '' });
+  const [mo, setMo] = useState(() => { const x = new Date(); x.setDate(1); return x; });
+  const cur = act[d] || {}, st = cur.steps || 0, km = kmOf(cur), mi = cur.min || 0;
+  const [flash, setFlash] = useState('');
+  const rec = n => { const pm = Math.max(0, ...Object.keys(act).filter(k => k !== d).map(k => act[k].steps || 0)); if (pm > 0 && n > pm) setFlash('📈 Neuer Schritte-Rekord: ' + nf(n) + ' (+' + nf(n - pm) + ')'); };
+  const save = () => { rec(f.steps === '' ? st : Math.round(numIn(f.steps))); setAct({ ...act, [d]: { steps: f.steps === '' ? st : Math.round(numIn(f.steps)), km: f.km === '' ? (cur.km || 0) : numIn(f.km), min: f.min === '' ? mi : Math.round(numIn(f.min)) } }); setF({ steps: '', km: '', min: '' }); };
+  const sum = (ds, k) => ds.reduce((a, x) => a + (k === 'km' ? kmOf(act[x]) : ((act[x] || {})[k] || 0)), 0);
+  const mon = addD(today, -tdow + 7 * woff), wk = Array.from({ length: 7 }, (_, i) => addD(mon, i)), wv = wk.map(x => (act[x] || {}).steps || 0);
+  const prevW = Array.from({ length: 7 }, (_, i) => addD(mon, i - 7)), wTot = wv.reduce((a, b) => a + b, 0), pTot = sum(prevW, 'steps');
+  const y = mo.getFullYear(), m = mo.getMonth(), nd = new Date(y, m + 1, 0).getDate(), md = Array.from({ length: nd }, (_, i) => dstr(new Date(y, m, i + 1)));
+  const mv = md.filter(x => x <= today).map(x => (act[x] || {}).steps || 0), mTot = mv.reduce((a, b) => a + b, 0), mDays = mv.filter(v => v > 0).length;
+  const mxW = Math.max(goal.steps, ...wv) * 1.15;
+  const tile = (l, v, unit, g) => <div className="card glass" style={{ minHeight: 0 }}><span className="muted small">{l}</span><div><b className="big" style={{ fontSize: '1.6rem' }}>{v}</b> <span className="muted">{unit}</span></div><div className="bar" style={{ margin: '8px 0 0' }}><i style={{ width: Math.min(100, g * 100) + '%' }} /></div></div>;
+  const stat = (l, v) => <div><div className="big" style={{ fontSize: '1.5rem' }}>{v}</div><span className="muted small">{l}</span></div>;
+  return (<>
+    <header className="hero"><p className="muted">Schritte, Distanz und aktive Zeit</p><h1>Aktivität</h1></header><Flash msg={flash} onDone={() => setFlash('')} />
+    <div className="tabs">{['Heute', 'Woche', 'Monat'].map(t => <button key={t} className={'btn ghost' + (tab === t ? ' act' : '')} onClick={() => setTab(t)}>{t}</button>)}</div>
+    {tab === 'Heute' && <>
+      <section className="card glass" style={{ marginBottom: 14 }}><div className="row between"><b>{deDate(d)}</b><input type="date" value={d} onChange={e => e.target.value && setD(e.target.value)} style={{ width: 'auto' }} aria-label="Datum" /></div>
+        <div className="lvl" style={{ justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}><Ring pct={st / goal.steps} big={nf(st)} sub={'von ' + nf(goal.steps) + ' Schritten'} />
+          <div><p className="muted">{st >= goal.steps ? 'Tagesziel erreicht 🔥' : 'Noch ' + nf(goal.steps - st) + ' Schritte bis zum Ziel'}</p><div className="row" style={{ marginTop: 10, flexWrap: 'wrap' }}>{[1000, 2500, 5000].map(n => <button key={n} className="btn ghost" onClick={() => { rec(st + n); setAct({ ...act, [d]: { ...cur, steps: st + n } }); }}>+{nf(n)}</button>)}</div></div></div></section>
+      <div className="grid" style={{ marginBottom: 14 }}>{tile('Distanz', km.toFixed(1).replace('.', ','), 'km', km / goal.km)}{tile('Aktive Zeit', mi, 'min', mi / goal.min)}</div>
+      <section className="card glass" style={{ marginBottom: 14 }}><h2>Tageswerte eintragen</h2><p className="muted small" style={{ marginBottom: 10 }}>Trag die Gesamtwerte des Tages ein. Leere Felder bleiben unverändert. Ohne Distanz schätzt die App sie aus den Schritten.</p>
+        <div className="pgrid"><input inputMode="numeric" placeholder={'Schritte (' + nf(st) + ')'} value={f.steps} onChange={e => setF({ ...f, steps: e.target.value })} /><input inputMode="decimal" placeholder={'Distanz km (' + km.toFixed(1).replace('.', ',') + ')'} value={f.km} onChange={e => setF({ ...f, km: e.target.value })} /><input inputMode="numeric" placeholder={'Aktive Min. (' + mi + ')'} value={f.min} onChange={e => setF({ ...f, min: e.target.value })} /></div>
+        <button className="btn" style={{ marginTop: 12 }} onClick={save}>Speichern</button></section>
+      <section className="card glass"><h2>Tagesziele</h2><div className="pgrid">{[['steps', 'Schritte'], ['km', 'Distanz (km)'], ['min', 'Aktive Minuten']].map(([k, l]) => <label key={k} className="fld"><span className="muted small">{l}</span><input inputMode="decimal" value={goal[k]} onChange={e => setGoal({ ...goal, [k]: numIn(e.target.value) || 0 })} /></label>)}</div></section></>}
+    {tab === 'Woche' && <section className="card glass">
+      <div className="row between"><button className="btn ghost" aria-label="Vorherige Woche" onClick={() => setWoff(woff - 1)}>‹</button><b>{deDate(wk[0])} – {deDate(wk[6])}</b><button className="btn ghost" aria-label="Nächste Woche" disabled={woff >= 0} onClick={() => setWoff(woff + 1)}>›</button></div>
+      <svg viewBox="0 0 320 150" className="chart" role="img" aria-label="Schritte pro Wochentag"><defs><linearGradient id="abg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#c4b5fd" /><stop offset="1" stopColor="#7c3aed" stopOpacity=".55" /></linearGradient></defs>
+        <line x1="8" x2="312" y1={120 - goal.steps / mxW * 110} y2={120 - goal.steps / mxW * 110} stroke="rgba(255,255,255,.3)" strokeDasharray="4 4" />
+        {wv.map((v, i) => { const h = v / mxW * 110; return <g key={i}><rect x={14 + i * 43} y={120 - Math.max(h, 2)} width="30" height={Math.max(h, 2)} rx="8" fill="url(#abg)" stroke={v >= goal.steps ? '#fff' : 'none'} strokeOpacity=".7" /><text x={29 + i * 43} y="138" textAnchor="middle" fontSize="10" fill="#9aa3b2">{WD[i].slice(0, 2)}</text></g>; })}</svg>
+      <div className="stat3" style={{ marginTop: 12 }}>{stat('Schritte gesamt', nf(wTot))}{stat('Ø pro Tag', nf(wTot / Math.max(1, wv.filter(v => v > 0).length)))}{stat('Ziel erreicht', wv.filter(v => v >= goal.steps).length + ' / 7')}</div>
+      <p className="muted" style={{ marginTop: 12 }}>{fmtN(sum(wk, 'km'))} km · {nf(sum(wk, 'min'))} aktive Minuten{pTot > 0 ? ' · ' + (wTot >= pTot ? '+' : '') + Math.round((wTot - pTot) / pTot * 100) + ' % zur Vorwoche' : ''}</p></section>}
+    {tab === 'Monat' && <section className="card glass">
+      <div className="row between"><button className="btn ghost" aria-label="Vorheriger Monat" onClick={() => setMo(new Date(y, m - 1, 1))}>‹</button><b>{mo.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}</b><button className="btn ghost" aria-label="Nächster Monat" onClick={() => setMo(new Date(y, m + 1, 1))}>›</button></div>
+      <div className="mgrid">{['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(x => <span key={x} className="muted wd">{x}</span>)}{Array.from({ length: (new Date(y, m, 1).getDay() + 6) % 7 }).map((_, i) => <span key={'o' + i} />)}
+        {md.map(c => { const p = ((act[c] || {}).steps || 0) / goal.steps; return <button key={c} className={'day' + (p > 0 ? ' g' : '') + (c === today ? ' today' : '')} style={p > 0 ? { background: 'color-mix(in srgb, var(--accent) ' + Math.round(Math.min(1, p) * 75 + 8) + '%, rgba(255,255,255,.04))' } : undefined} aria-label={deDate(c) + ': ' + nf((act[c] || {}).steps || 0) + ' Schritte'} onClick={() => { setD(c); setTab('Heute'); }}>{+c.slice(8)}</button>; })}</div>
+      <div className="stat3" style={{ margin: '14px 0' }}>{stat('Schritte gesamt', nf(mTot))}{stat('Ø pro Tag', nf(mTot / Math.max(1, mDays)))}{stat('Ziel erreicht', mv.filter(v => v >= goal.steps).length + ' Tage')}</div>
+      <h2>Bewegungstrend</h2><Trend vals={mv} goal={goal.steps} /><p className="muted small">Dicke Linie: 7-Tage-Schnitt · gestrichelt: Tagesziel</p></section>}
+  </>);
+}
+// Bereiche gebündelt: weniger Menüpunkte, alle Funktionen bleiben erhalten
+function Hub({ id, tabs }) {
+  const [t, setT] = useLocalStorage('th.hub.' + id, tabs[0][0]);
+  const cur = tabs.find(x => x[0] === t) || tabs[0];
+  return (<><div className="tabs">{tabs.map(([l]) => <button key={l} className={'btn ghost' + (cur[0] === l ? ' act' : '')} aria-pressed={cur[0] === l} onClick={() => setT(l)}>{l}</button>)}</div>{cur[1]}</>);
+}
+const DashHub = () => <Hub id="dash" tabs={[['Übersicht', <Dashboard />], ['Briefing', <Brief />]]} />;
+const PlanHub = () => <Hub id="plan" tabs={[['Tagesplan', <Plan />], ['Termine eintragen', <Calendar />]]} />;
+const TasksHub = () => <Hub id="tasks" tabs={[['Aufgaben', <Tasks />], ['Daily Check', <DailyCheck />]]} />;
+const TrainHub = () => <Hub id="train" tabs={[['Gym', <Gym />], ['Football', <FootballHub />], ['Verlauf', <Stats />]]} />;
+function ProfileHub() {
+  const [v, setV] = useState('profil');
+  if (v === 'profil') return <Profile onOpen={() => setV('tiers')} />;
+  return <Board mode={v === 'tiers' ? 'tiers' : 'list'} onHof={() => setV('list')} onBack={() => setV(v === 'list' ? 'tiers' : 'profil')} />;
+}
+const POS = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K/P'];
+const FBM = { '40 Yard Dash': ['s', true], '20 Yard Sprint': ['s', true], '10 Yard Split': ['s', true], 'Vertical Jump': ['cm', false], 'Broad Jump': ['m', false] };
+const ROUTES = ['Slant', 'Out', 'Curl', 'Post', 'Corner', 'Go', 'Hitch', 'Comeback'];
+const bestOf = (l, low) => l.length ? (low ? Math.min(...l.map(x => x.val)) : Math.max(...l.map(x => x.val))) : null;
+function Spark({ vals }) {
+  if (vals.length < 2) return <p className="muted small">Das Diagramm erscheint ab dem zweiten Wert.</p>;
+  const W = 300, H = 90, lo = Math.min(...vals), hi = Math.max(...vals), x = i => 10 + i * (W - 20) / (vals.length - 1), y = v => hi === lo ? H / 2 : H - 10 - (v - lo) / (hi - lo) * (H - 20);
+  return <svg viewBox={'0 0 ' + W + ' ' + H} className="chart" role="img" aria-label="Verlauf"><polyline points={vals.map((v, i) => x(i) + ',' + y(v)).join(' ')} fill="none" stroke="var(--accent)" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />{vals.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r="4" fill="var(--accent)" />)}</svg>;
+}
+function FootballHub() {
+  const [pos, setPos] = useLocalStorage('th.fbpos', '');
+  const [t, setT] = useLocalStorage('th.fbtab', 'Sessions');
+  const tabs = ['Sessions', 'Messwerte', 'Fangen & Routen', 'Spiele', 'Ziele'];
+  return (<><div className="row" style={{ marginBottom: 12 }}><span className="muted">Position:</span><select value={pos} onChange={e => setPos(e.target.value)} style={{ width: 'auto' }} aria-label="Position"><option value="">–</option>{POS.map(p => <option key={p}>{p}</option>)}</select></div>
+    <div className="tabs">{tabs.map(x => <button key={x} className={'btn ghost' + (t === x ? ' act' : '')} onClick={() => setT(x)}>{x}</button>)}</div>
+    {t === 'Sessions' && <Football />}{t === 'Messwerte' && <FbMeasure />}{t === 'Fangen & Routen' && <FbCatch />}{t === 'Spiele' && <FbGames />}{t === 'Ziele' && <FbGoals />}</>);
+}
+function FbMeasure() {
+  const [log, setLog] = useLocalStorage('th.fbm', []);
+  const [f, setF] = useState({ type: '40 Yard Dash', val: '', date: dstr(new Date()) });
+  const [unit, low] = FBM[f.type]; const [flash, setFlash] = useState('');
+  const mine = log.filter(x => x.type === f.type).sort((a, b) => a.date.localeCompare(b.date));
+  const best = bestOf(mine, low), gain = mine.length > 1 ? (low ? mine[0].val - mine[mine.length - 1].val : mine[mine.length - 1].val - mine[0].val) : null;
+  const save = () => { const v = numIn(f.val); if (v > 0) { const pb = bestOf(log.filter(x => x.type === f.type), low); if (pb !== null && (low ? v < pb : v > pb)) setFlash('📈 Neuer Bestwert! ' + f.type + ': ' + fmtN(v) + ' ' + unit + ' (' + (low ? '−' : '+') + fmtN(Math.abs(v - pb)) + ' ' + unit + ')'); setLog([...log, { id: Date.now(), date: f.date, type: f.type, val: v }]); setF({ ...f, val: '' }); } };
+  return (<div className="cal-wrap">
+    <Flash msg={flash} onDone={() => setFlash('')} /><section className="card glass"><h2>Messwert erfassen</h2><div className="form"><select value={f.type} onChange={e => setF({ ...f, type: e.target.value })} aria-label="Messwert">{Object.keys(FBM).map(k => <option key={k}>{k}</option>)}</select>
+      <div className="row"><input inputMode="decimal" placeholder={'Wert in ' + unit} value={f.val} onChange={e => setF({ ...f, val: e.target.value })} /><input type="date" value={f.date} onChange={e => setF({ ...f, date: e.target.value })} /></div>
+      <button className="btn" onClick={save}>Speichern</button></div></section>
+    <section className="card glass"><h2>{f.type}</h2>
+      {best !== null ? <p>Bestwert: <b>{fmtN(best)} {unit}</b>{gain !== null && <span className="muted"> · {gain >= 0 ? 'verbessert um ' : 'verschlechtert um '}{fmtN(Math.abs(gain))} {unit}</span>}</p> : <p className="muted">Noch keine Werte.</p>}
+      <Spark vals={mine.map(x => x.val)} />
+      {mine.slice(-5).reverse().map(x => <div key={x.id} className="note row between" style={{ marginBottom: 0 }}><span>{deDate(x.date)}</span><span><b>{fmtN(x.val)} {unit}</b> <button className="x" aria-label="Wert löschen" onClick={() => setLog(log.filter(y => y.id !== x.id))}>✕</button></span></div>)}</section></div>);
+}
+function FbCatch() {
+  const [log, setLog] = useLocalStorage('th.fbc', []);
+  const [f, setF] = useState({ kind: 'Fangtraining', route: ROUTES[0], tries: '', ok: '', note: '', date: dstr(new Date()) });
+  const save = () => { const t = Math.round(numIn(f.tries)), o = Math.round(numIn(f.ok)); if (t > 0 && o >= 0 && o <= t) { setLog([{ id: Date.now(), date: f.date, kind: f.kind, route: f.kind === 'Route Running' ? f.route : '', tries: t, ok: o, note: f.note.trim() }, ...log]); setF({ ...f, tries: '', ok: '', note: '' }); } };
+  const ct = log.filter(x => x.kind === 'Fangtraining'), tT = ct.reduce((a, x) => a + x.tries, 0), tO = ct.reduce((a, x) => a + x.ok, 0);
+  return (<div className="cal-wrap">
+    <section className="card glass"><h2>Eintrag</h2><div className="form"><select value={f.kind} onChange={e => setF({ ...f, kind: e.target.value })} aria-label="Art"><option>Fangtraining</option><option>Route Running</option></select>
+      {f.kind === 'Route Running' && <select value={f.route} onChange={e => setF({ ...f, route: e.target.value })} aria-label="Route">{ROUTES.map(r => <option key={r}>{r}</option>)}</select>}
+      <div className="row"><input inputMode="numeric" placeholder="Versuche" value={f.tries} onChange={e => setF({ ...f, tries: e.target.value })} /><input inputMode="numeric" placeholder="Sauber gefangen" value={f.ok} onChange={e => setF({ ...f, ok: e.target.value })} /></div>
+      <input type="date" value={f.date} onChange={e => setF({ ...f, date: e.target.value })} /><input placeholder="Notiz (optional)" value={f.note} onChange={e => setF({ ...f, note: e.target.value })} /><button className="btn" onClick={save}>Speichern</button></div></section>
+    <section className="card glass"><h2>Protokoll</h2>{tT > 0 && <p>Fangquote gesamt: <b>{Math.round(tO / tT * 100)} %</b> <span className="muted">({tO} von {tT})</span></p>}
+      {log.length ? log.slice(0, 12).map(x => <div key={x.id} className="note"><div className="row between" style={{ marginBottom: 0 }}><b>{x.kind}{x.route ? ': ' + x.route : ''}</b><button className="x" aria-label="Eintrag löschen" onClick={() => setLog(log.filter(y => y.id !== x.id))}>✕</button></div><span className="muted">{deDate(x.date)} · {x.ok}/{x.tries} ({Math.round(x.ok / x.tries * 100)} %){x.note ? ' · ' + x.note : ''}</span></div>) : <p className="muted">Noch keine Einträge.</p>}</section></div>);
+}
+function FbGames() {
+  const [log, setLog] = useLocalStorage('th.fbg', []);
+  const blank = { date: dstr(new Date()), opp: '', pf: '', pa: '', c: '', y: '', td: '', tk: '', int: '' };
+  const [f, setF] = useState(blank);
+  const save = () => { if (f.opp.trim()) { setLog([{ id: Date.now(), date: f.date, opp: f.opp.trim(), pf: numIn(f.pf), pa: numIn(f.pa), c: numIn(f.c), y: numIn(f.y), td: numIn(f.td), tk: numIn(f.tk), int: numIn(f.int) }, ...log]); setF(blank); } };
+  const S = k => log.reduce((a, x) => a + x[k], 0), w = log.filter(x => x.pf > x.pa).length, l = log.filter(x => x.pf < x.pa).length;
+  const fld = (k, ph) => <input key={k} inputMode="numeric" placeholder={ph} value={f[k]} onChange={e => setF({ ...f, [k]: e.target.value })} />;
+  return (<div className="cal-wrap">
+    <section className="card glass"><h2>Spiel eintragen</h2><div className="form"><div className="row"><input type="date" value={f.date} onChange={e => setF({ ...f, date: e.target.value })} /><input placeholder="Gegner" value={f.opp} onChange={e => setF({ ...f, opp: e.target.value })} /></div>
+      <div className="pgrid">{fld('pf', 'Punkte wir')}{fld('pa', 'Punkte Gegner')}{fld('c', 'Fänge')}{fld('y', 'Yards')}{fld('td', 'Touchdowns')}{fld('tk', 'Tackles')}{fld('int', 'Interceptions')}</div><button className="btn" onClick={save}>Spiel speichern</button></div></section>
+    <section className="card glass"><h2>Saison</h2>{log.length ? <><div className="stat3"><div><div className="big" style={{ fontSize: '1.5rem' }}>{w}–{l}</div><span className="muted small">Bilanz</span></div><div><div className="big" style={{ fontSize: '1.5rem' }}>{S('td')}</div><span className="muted small">Touchdowns</span></div><div><div className="big" style={{ fontSize: '1.5rem' }}>{S('y')}</div><span className="muted small">Yards</span></div></div><p className="muted" style={{ margin: '10px 0' }}>{S('c')} Fänge · {S('tk')} Tackles · {S('int')} Interceptions</p>
+      {log.map(x => <div key={x.id} className="note row between" style={{ marginBottom: 0 }}><span><b>{x.pf}:{x.pa}</b> gegen {x.opp} <span className="muted">· {deDate(x.date)}</span></span><button className="x" aria-label="Spiel löschen" onClick={() => setLog(log.filter(y => y.id !== x.id))}>✕</button></div>)}</> : <p className="muted">Noch keine Spiele eingetragen.</p>}</section></div>);
+}
+function FbGoals() {
+  const [goals, setGoals] = useLocalStorage('th.fbgoal', []); const [log] = useLocalStorage('th.fbm', []);
+  const [f, setF] = useState({ type: '40 Yard Dash', target: '' });
+  const add = () => { const t = numIn(f.target); if (t > 0) { setGoals([...goals, { id: Date.now(), type: f.type, target: t }]); setF({ ...f, target: '' }); } };
+  return (<section className="card glass"><h2>Individuelle Ziele</h2>
+    {goals.length ? goals.map(g => { const [unit, low] = FBM[g.type], b = bestOf(log.filter(x => x.type === g.type), low), reached = b !== null && (low ? b <= g.target : b >= g.target), p = b === null ? 0 : (low ? g.target / b : b / g.target);
+      return (<div key={g.id} className="note"><div className="row between" style={{ marginBottom: 0 }}><b>{g.type}: {low ? 'unter ' : 'mindestens '}{fmtN(g.target)} {unit}</b><button className="x" aria-label="Ziel löschen" onClick={() => setGoals(goals.filter(x => x.id !== g.id))}>✕</button></div>
+        <div className="bar" style={{ margin: '8px 0' }}><i style={{ width: Math.min(100, p * 100) + '%' }} /></div><span className="muted">{b === null ? 'Noch kein Messwert' : 'Aktuell ' + fmtN(b) + ' ' + unit + (reached ? ' · Ziel erreicht 🔥' : '')}</span></div>); }) : <p className="muted">Noch keine Ziele. Setz dir eins, zum Beispiel 40 Yard Dash unter 5,0 s.</p>}
+    <div className="form" style={{ marginTop: 14 }}><select value={f.type} onChange={e => setF({ ...f, type: e.target.value })} aria-label="Messwert">{Object.keys(FBM).map(k => <option key={k}>{k}</option>)}</select>
+      <input inputMode="decimal" placeholder={'Zielwert in ' + FBM[f.type][0]} value={f.target} onChange={e => setF({ ...f, target: e.target.value })} /><button className="btn" onClick={add}>Ziel hinzufügen</button></div></section>);
+}
+function Flash({ msg, onDone }) {
+  useEffect(() => { if (!msg) return; const t = setTimeout(onDone, 5000); return () => clearTimeout(t); }, [msg]);
+  if (!msg) return null;
+  return <div className="flash glass" role="status" onClick={onDone}>{msg}</div>;
+}
+(function seedGym() {
+  try {
+    if (localStorage.getItem('th.gymSeed1')) return;
+    const ex = JSON.parse(localStorage.getItem('th.gymex') || 'null') || DEF_EX.slice();
+    if (!ex.some(e => e.n === 'Trap-Bar-Kreuzheben')) ex.push({ id: 7, n: 'Trap-Bar-Kreuzheben', m: 'Rücken' });
+    localStorage.setItem('th.gymex', JSON.stringify(ex)); localStorage.setItem('th.gymSeed1', '1');
+  } catch (e) { /* Speicher gesperrt */ }
+})();
+const sleepMin = (b, w) => { let m = toM(w) - toM(b); if (m <= 0) m += 1440; return m; };
+const hm = m => Math.floor(m / 60) + ':' + pad(Math.round(m % 60)) + ' h';
+const DEF_MOB = [{ id: 1, t: 'Hüftöffner', min: 10 }, { id: 2, t: 'Schulter-Mobility', min: 5 }, { id: 3, t: 'Foam Rolling Beine', min: 10 }, { id: 4, t: 'Dehnen nach dem Training', min: 8 }];
+function Bars({ vals, labels, goal }) {
+  const n = vals.length, mx = Math.max(goal || 0, ...vals, 1) * 1.15, step = 300 / n, bw = Math.min(30, step - 6);
+  return (<svg viewBox="0 0 320 150" className="chart" role="img" aria-label="Balkendiagramm"><defs><linearGradient id="gbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#c4b5fd" /><stop offset="1" stopColor="#7c3aed" stopOpacity=".55" /></linearGradient></defs>
+    {goal ? <line x1="8" x2="312" y1={120 - goal / mx * 110} y2={120 - goal / mx * 110} stroke="rgba(255,255,255,.3)" strokeDasharray="4 4" /> : null}
+    {vals.map((v, i) => { const h = Math.max(v / mx * 110, 2), x = 10 + i * step + (step - bw) / 2; return <g key={i}><rect x={x} y={120 - h} width={bw} height={h} rx="6" fill="url(#gbg)" stroke={goal && v >= goal ? '#fff' : 'none'} strokeOpacity=".7" /><text x={x + bw / 2} y="138" textAnchor="middle" fontSize="9" fill="#9aa3b2">{labels[i]}</text></g>; })}</svg>);
+}
+function Sleep() {
+  const [sl, setSl] = useLocalStorage('th.sleep', {}); const [goal, setGoal] = useLocalStorage('th.sleepgoal', 8);
+  const today = dstr(new Date()); const [d, setD] = useState(today); const [f, setF] = useState({ bed: '22:30', wake: '06:45' });
+  const dur = x => x ? sleepMin(x.bed, x.wake) : 0;
+  const week = Array.from({ length: 7 }, (_, i) => addD(today, i - 6)), vals = week.map(x => dur(sl[x]) / 60), wv = vals.filter(v => v > 0), avg = wv.length ? wv.reduce((a, b) => a + b, 0) / wv.length : 0;
+  const cur = dur(sl[d]), hist = Object.keys(sl).sort().reverse().slice(0, 14);
+  return (<>
+    <section className="card glass" style={{ marginBottom: 14 }}><div className="row between"><b>Nacht zum {deDate(d)}</b><input type="date" value={d} onChange={e => e.target.value && setD(e.target.value)} style={{ width: 'auto' }} aria-label="Datum des Aufwachens" /></div>
+      <div className="lvl" style={{ justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}><Ring pct={cur / 60 / goal} big={cur ? hm(cur) : '–'} sub={'von ' + goal + ' h'} />
+        <div className="form" style={{ flex: 1, minWidth: 200 }}><label className="fld"><span className="muted small">Schlafenszeit</span><input type="time" value={f.bed} onChange={e => setF({ ...f, bed: e.target.value })} /></label><label className="fld"><span className="muted small">Aufgestanden</span><input type="time" value={f.wake} onChange={e => setF({ ...f, wake: e.target.value })} /></label><button className="btn" onClick={() => setSl({ ...sl, [d]: { bed: f.bed, wake: f.wake } })}>Speichern</button></div></div></section>
+    <section className="card glass" style={{ marginBottom: 14 }}><h2>Letzte 7 Tage</h2><Bars vals={vals} labels={week.map(x => WD[(new Date(x + 'T12:00').getDay() + 6) % 7].slice(0, 2))} goal={goal} />
+      <p className="muted">{avg ? 'Ø ' + fmtN(avg) + ' h pro Nacht' + (avg < goal ? ' · ' + fmtN((goal - avg) * wv.length) + ' h Schlafschuld' : ' · Ziel erreicht') : 'Noch keine Daten.'}</p>
+      <label className="fld" style={{ marginTop: 10 }}><span className="muted small">Schlafziel (Stunden)</span><input inputMode="decimal" value={goal} onChange={e => setGoal(numIn(e.target.value) || 0)} style={{ maxWidth: 140 }} /></label></section>
+    <section className="card glass"><h2>Verlauf</h2>{hist.length ? hist.map(x => <div key={x} className="note row between" style={{ marginBottom: 0 }}><span>{deDate(x)} <span className="muted">· {sl[x].bed}–{sl[x].wake}</span></span><span><b>{hm(dur(sl[x]))}</b> <button className="x" aria-label="Eintrag löschen" onClick={() => { const n = { ...sl }; delete n[x]; setSl(n); }}>✕</button></span></div>) : <p className="muted">Noch keine Nächte eingetragen.</p>}</section></>);
+}
+function Recovery() {
+  const [well, setWell] = useLocalStorage('th.well', {}); const [rest, setRest] = useLocalStorage('th.rest', [6]);
+  const [mob, setMob] = useLocalStorage('th.mob', DEF_MOB); const [md, setMd] = useLocalStorage('th.mobdone', {});
+  const [sl] = useLocalStorage('th.sleep', {}); const [goal] = useLocalStorage('th.sleepgoal', 8);
+  const [events] = useLocalStorage('th.events', []); const [plan] = useLocalStorage('th.plan', {}); const [pd] = useLocalStorage('th.plandone', {});
+  const [dItems] = useLocalStorage('th.checks', DEFAULT_CHECKS); const [dCd] = useLocalStorage('th.checkdone', {});
+  const [mt, setMt] = useState('');
+  const today = dstr(new Date()), tdow = (new Date().getDay() + 6) % 7, w = well[today] || {}, mine = md[today] || [];
+  const setW = (k, v) => setWell({ ...well, [today]: { ...w, [k]: v } });
+  const dset = new Set(doneAll(events, plan, pd, dItems, dCd).map(e => e.date));
+  let streak = 0, x = today; if (!dset.has(x)) x = addD(x, -1); while (dset.has(x)) { streak++; x = addD(x, -1); }
+  const hrs = sl[today] ? sleepMin(sl[today].bed, sl[today].wake) / 60 : null, parts = [w.e && w.e / 5, w.m && (6 - w.m) / 5, w.s && w.s / 5].filter(Boolean);
+  const sS = hrs === null ? .6 : Math.min(1, hrs / goal), wS = parts.length ? parts.reduce((a, b) => a + b, 0) / parts.length : .6, lS = 1 - [0, 1, 2].filter(i => dset.has(addD(today, -i))).length * .2;
+  const score = Math.round(100 * (.45 * sS + .35 * wS + .2 * lS));
+  const clash = rest.filter(i => (plan[i] || []).some(p => WORKOUT(p.cat)));
+  const Rate = (label, k, lo, hi) => <div style={{ marginBottom: 12 }}><div className="row between" style={{ marginBottom: 6 }}><b>{label}</b><span className="muted small">{lo} → {hi}</span></div><div>{[1, 2, 3, 4, 5].map(n => <button key={n} className={'chip' + (w[k] === n ? ' on' : '')} aria-pressed={w[k] === n} onClick={() => setW(k, n)}>{n}</button>)}</div></div>;
+  return (<>
+    <section className="card glass" style={{ marginBottom: 14 }}><div className="lvl"><Ring size={110} pct={score / 100} big={score} sub="Erholung" /><div style={{ flex: 1 }}><b>{score >= 75 ? 'Bereit für hartes Training' : score >= 50 ? 'Normales Training passt' : 'Heute lieber locker'}</b>
+      <p className="muted">Aus Schlaf, Wohlbefinden und Trainingslast der letzten 3 Tage.{hrs === null ? ' Trag deinen Schlaf ein, für einen genaueren Wert.' : ''}</p></div></div></section>
+    <section className="card glass" style={{ marginBottom: 14 }}><h2>Wohlbefinden heute</h2>{Rate('Energie', 'e', 'leer', 'topfit')}{Rate('Muskelkater', 'm', 'keiner', 'stark')}{Rate('Stimmung', 's', 'schlecht', 'super')}</section>
+    <section className="card glass" style={{ marginBottom: 14 }}><h2>Ruhetage</h2><div>{WD.map((n, i) => <button key={n} className={'chip' + (rest.includes(i) ? ' on' : '')} aria-pressed={rest.includes(i)} onClick={() => setRest(rest.includes(i) ? rest.filter(y => y !== i) : [...rest, i])}>{n.slice(0, 2)}</button>)}</div>
+      {rest.includes(tdow) && <p style={{ marginTop: 10 }}>Heute ist Ruhetag. {dset.has(today) ? 'Du hast trotzdem trainiert.' : 'Gönn dir Mobility.'}</p>}
+      {streak >= 4 && <p className="err" style={{ marginTop: 8 }}>{streak} Trainingstage in Folge. Plane bald einen Ruhetag ein.</p>}
+      {clash.length > 0 && <p className="err" style={{ marginTop: 8 }}>Im Tagesplan steht Training an: {clash.map(i => WD[i]).join(', ')} (Ruhetag).</p>}</section>
+    <section className="card glass"><h2>Mobility-Routinen</h2>{mob.map(m => <div key={m.id} className="chk"><button className={'box' + (mine.includes(m.id) ? ' on' : '')} aria-pressed={mine.includes(m.id)} aria-label={m.t} onClick={() => setMd({ ...md, [today]: mine.includes(m.id) ? mine.filter(y => y !== m.id) : [...mine, m.id] })}>{mine.includes(m.id) ? '✓' : ''}</button><span className={mine.includes(m.id) ? 'muted' : ''}>{m.t} <span className="muted small">· {m.min} Min.</span></span><button className="x" aria-label="Löschen" onClick={() => setMob(mob.filter(y => y.id !== m.id))}>✕</button></div>)}
+      <div className="row" style={{ marginTop: 12 }}><input className="inp" placeholder="Neue Routine" value={mt} onChange={e => setMt(e.target.value)} /><button className="btn" onClick={() => { if (mt.trim()) { setMob([...mob, { id: Date.now(), t: mt.trim(), min: 10 }]); setMt(''); } }}>Hinzufügen</button></div></section></>);
+}
+function Reports() {
+  const [events] = useLocalStorage('th.events', []); const [plan] = useLocalStorage('th.plan', {}); const [pd] = useLocalStorage('th.plandone', {});
+  const [dItems] = useLocalStorage('th.checks', DEFAULT_CHECKS); const [dCd] = useLocalStorage('th.checkdone', {});
+  const [gym] = useLocalStorage('th.gym', []); const [act] = useLocalStorage('th.act', {}); const [sl] = useLocalStorage('th.sleep', {});
+  const [ml] = useLocalStorage('th.mlog', {}); const [dishes] = useLocalStorage('th.dishes', []); const [cust] = useLocalStorage('th.foods', []); const [water] = useLocalStorage('th.water', {}); const [tasks] = useLocalStorage('th.tasks', []);
+  const [kind, setKind] = useState('Woche'); const [off, setOff] = useState(0);
+  const today = dstr(new Date()), tdow = (new Date().getDay() + 6) % 7, done = doneAll(events, plan, pd, dItems, dCd), foods = [...FOODS0, ...cust];
+  const rng = (k, o) => { if (k === 'Woche') { const mon = addD(today, -tdow + 7 * o); return Array.from({ length: 7 }, (_, i) => addD(mon, i)); }
+    const t = new Date(), y = k === 'Monat' ? new Date(t.getFullYear(), t.getMonth() + o, 1) : new Date(t.getFullYear() + o, 0, 1), n = k === 'Monat' ? new Date(y.getFullYear(), y.getMonth() + 1, 0).getDate() : Math.round((new Date(y.getFullYear() + 1, 0, 1) - y) / 864e5);
+    return Array.from({ length: n }, (_, i) => dstr(new Date(y.getFullYear(), y.getMonth(), y.getDate() + i))); };
+  const kcal = d => (ml[d] || []).reduce((a, e) => a + nut(e.food ? [{ food: e.food, g: e.g }] : ((dishes.find(z => z.id === e.dish) || {}).items || []), foods).k, 0);
+  const avgOf = l => l.length ? l.reduce((a, b) => a + b, 0) / l.length : 0;
+  const metrics = D => { const s = new Set(D), dn = done.filter(e => s.has(e.date)), up = D.filter(z => z <= today);
+    return { days: new Set(dn.map(e => e.date)).size, sess: dn.length, vol: gym.filter(g => s.has(g.date)).reduce((a, g) => a + g.kg * g.reps, 0), steps: D.reduce((a, z) => a + ((act[z] || {}).steps || 0), 0), sleep: avgOf(D.filter(z => sl[z]).map(z => sleepMin(sl[z].bed, sl[z].wake) / 60)), kcal: avgOf(D.map(kcal).filter(v => v > 0)), water: avgOf(D.map(z => water[z] || 0).filter(v => v > 0)) / 1000,
+      tasks: tasks.reduce((a, t) => a + (t.doneOn || []).filter(z => s.has(z)).length, 0), chk: up.length && dItems.length ? Math.round(up.reduce((a, z) => a + dItems.filter(i => (dCd[z] || []).includes(i.id)).length, 0) / (up.length * dItems.length) * 100) : 0, dn }; };
+  const D = rng(kind, off), M = metrics(D), P = metrics(rng(kind, off - 1));
+  const groups = kind === 'Woche' ? D.map(z => [z]) : kind === 'Monat' ? Array.from({ length: Math.ceil(D.length / 7) }, (_, i) => D.slice(i * 7, i * 7 + 7)) : Array.from({ length: 12 }, (_, i) => D.filter(z => +z.slice(5, 7) === i + 1));
+  const labels = kind === 'Woche' ? WD.map(z => z.slice(0, 2)) : kind === 'Monat' ? groups.map((_, i) => 'W' + (i + 1)) : 'JFMAMJJASOND'.split('');
+  const title = kind === 'Woche' ? deDate(D[0]) + ' – ' + deDate(D[6]) : kind === 'Monat' ? new Date(D[0] + 'T12:00').toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }) : D[0].slice(0, 4);
+  const delta = (a, b) => b > 0 && a > 0 ? (a >= b ? '📈 +' : '📉 −') + Math.abs(Math.round((a - b) / b * 100)) + ' %' : '';
+  const tile = (l, v, a, b) => <div key={l} className="card glass" style={{ minHeight: 0 }}><span className="muted small">{l}</span><div className="big" style={{ fontSize: '1.5rem' }}>{v}</div><span className="muted small">{delta(a, b) || ' '}</span></div>;
+  return (<>
+    <div className="tabs">{['Woche', 'Monat', 'Jahr'].map(k => <button key={k} className={'btn ghost' + (kind === k ? ' act' : '')} onClick={() => { setKind(k); setOff(0); }}>{k}</button>)}</div>
+    <section className="card glass" style={{ marginBottom: 14 }}><div className="row between"><button className="btn ghost" aria-label="Zurück" onClick={() => setOff(off - 1)}>‹</button><b>{title}</b><button className="btn ghost" aria-label="Weiter" disabled={off >= 0} onClick={() => setOff(off + 1)}>›</button></div>
+      <h2>Trainings</h2><Bars vals={groups.map(g => M.dn.filter(e => g.includes(e.date)).length)} labels={labels} /></section>
+    <div className="grid">{tile('Trainingstage', M.days, M.days, P.days)}{tile('Sessions', M.sess, M.sess, P.sess)}{tile('Gym-Volumen', nf(M.vol) + ' kg', M.vol, P.vol)}{tile('Schritte', nf(M.steps), M.steps, P.steps)}{tile('Ø Schlaf', M.sleep ? fmtN(M.sleep) + ' h' : '–', M.sleep, P.sleep)}{tile('Ø Kalorien', M.kcal ? nf(M.kcal) : '–', 0, 0)}{tile('Ø Wasser', M.water ? fmtN(M.water) + ' L' : '–', 0, 0)}{tile('Aufgaben erledigt', M.tasks, M.tasks, P.tasks)}{tile('Daily Check', M.chk + ' %', M.chk, P.chk)}</div></>);
+}
+const SleepHub = () => <Hub id="sleep" tabs={[['Schlaf', <Sleep />], ['Erholung', <Recovery />], ['Berichte', <Reports />]]} />;
+// Supabase: hier die zwei Werte aus deinem Supabase-Projekt eintragen (siehe ANLEITUNG.md)
+const SUPABASE_URL = 'https://wtnnjekkoxqqnxbdmstc.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_aDhAQlG4D0zqSHDpWoHNug_Mw1YXpjh';
+const sb = SUPABASE_URL.indexOf('http') === 0 && SUPABASE_KEY.length > 20 && window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+const cloud = {
+  user: null, last: {},
+  async up(force) {
+    if (!sb) return 'Die Cloud ist noch nicht eingerichtet.';
+    if (!this.user) return 'Du bist nicht angemeldet.';
+    const rows = []; let big = 0;
+    for (const k of Object.keys(localStorage).filter(x => x.indexOf('th.') === 0 && x !== 'th.page' && x !== 'th.cloudauto' && x.indexOf('th.hub.') !== 0)) {
+      const v = localStorage.getItem(k); if (v === null || (!force && this.last[k] === v)) continue;
+      if (v.length > 900000) { big++; continue; }
+      rows.push({ user_id: this.user.id, key: k, value: v, updated_at: new Date().toISOString() });
+    }
+    if (rows.length) { const { error } = await sb.from('user_data').upsert(rows, { onConflict: 'user_id,key' }); if (error) return 'Sichern fehlgeschlagen: ' + error.message; rows.forEach(r => { this.last[r.key] = r.value; }); }
+    return rows.length + ' Bereiche gesichert' + (big ? ', ' + big + ' zu gro\u00df' : '') + ' (' + new Date().toLocaleTimeString('de-DE') + ')';
+  },
+  async down() {
+    if (!sb) return 'Die Cloud ist noch nicht eingerichtet.';
+    if (!this.user) return 'Du bist nicht angemeldet.';
+    const { data, error } = await sb.from('user_data').select('key,value');
+    if (error) return 'Laden fehlgeschlagen: ' + error.message;
+    let n = 0; (data || []).forEach(r => { if (typeof r.key === 'string' && r.key.indexOf('th.') === 0) { localStorage.setItem(r.key, r.value); this.last[r.key] = r.value; n++; } });
+    if (n) setTimeout(() => location.reload(), 700);
+    return n ? n + ' Bereiche geladen. Die Seite l\u00e4dt neu\u2026' : 'In der Cloud liegt noch nichts.';
+  }
+};
+function CloudCard() {
+  const [auto, setAuto] = useLocalStorage('th.cloudauto', true); const [st, setSt] = useState(''); const [ask, setAsk] = useState(false);
+  return (<section className="card glass" style={{ marginBottom: 16 }}><h2>Cloud-Sicherung</h2>
+    <p className="muted small" style={{ marginBottom: 10 }}>Deine Daten werden privat in deinem Konto gespeichert, nur du kannst sie lesen. So hast du sie auf allen Geräten, auf denen du angemeldet bist.</p>
+    <div className="row" style={{ flexWrap: 'wrap' }}><button className="btn" onClick={async () => { setSt('Sichere…'); setSt(await cloud.up(true)); }}>Jetzt sichern</button>
+      {!ask ? <button className="btn ghost" onClick={() => setAsk(true)}>Aus Cloud laden</button> : <><span className="err">Lokale Daten werden überschrieben.</span><button className="btn" onClick={async () => { setAsk(false); setSt('Lade…'); setSt(await cloud.down()); }}>Ja, laden</button><button className="btn ghost" onClick={() => setAsk(false)}>Abbrechen</button></>}</div>
+    <label className="toggle muted"><input type="checkbox" checked={auto} onChange={e => setAuto(e.target.checked)} /> Automatisch sichern (alle 45 Sekunden bei Änderungen)</label>
+    {st && <p className="muted" role="status" style={{ marginTop: 8 }}>{st}</p>}<div className="row between" style={{ marginTop: 12 }}><span className="muted small">{cloud.user ? 'Angemeldet als ' + cloud.user.email : 'Nicht angemeldet'}</span>{cloud.user && <button className="btn ghost" onClick={() => sb && sb.auth.signOut()}>Abmelden</button>}</div></section>);
+}
+function HealthCard() {
+  const [act, setAct] = useLocalStorage('th.act', {}); const [sl, setSl] = useLocalStorage('th.sleep', {});
+  const [msg, setMsg] = useState(''); const [busy, setBusy] = useState(false);
+  const run = async (fn, e) => { const f = e.target.files[0]; if (!f) return; setBusy(true); setMsg('Lese Datei…'); try { await fn(f); } catch (err) { setMsg('Import fehlgeschlagen: ' + ((err && err.message) || 'unbekannter Fehler')); } setBusy(false); e.target.value = ''; };
+  const apple = async f => {
+    const rd = f.stream().getReader(), dec = new TextDecoder(); let buf = '', read = 0, shown = 0; const steps = {}, nights = {};
+    const sRe = /type="HKQuantityTypeIdentifierStepCount".*?sourceName="([^"]*)".*?startDate="(\d{4}-\d\d-\d\d)[^"]*".*?value="([\d.]+)"/, zRe = /type="HKCategoryTypeIdentifierSleepAnalysis".*?startDate="([^"]*)"\s+endDate="([^"]*)"\s+value="([^"]*)"/;
+    const T = s => new Date(s.replace(' ', 'T').replace(' ', '').replace(/([+-]\d\d)(\d\d)$/, '$1:$2')).getTime();
+    const keyOf = s => dstr(new Date(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10), +s.slice(11, 13) + 6));
+    const line = l => {
+      if (l.indexOf('StepCount') > 0) { const m = sRe.exec(l); if (m) { const o = (steps[m[2]] = steps[m[2]] || {}); o[m[1]] = (o[m[1]] || 0) + parseFloat(m[3]); } }
+      else if (l.indexOf('SleepAnalysis') > 0) { const m = zRe.exec(l); if (m && /Asleep/.test(m[3])) { const n = (nights[keyOf(m[1])] = nights[keyOf(m[1])] || { bs: Infinity, we: -Infinity }), a = T(m[1]), b = T(m[2]); if (a < n.bs) { n.bs = a; n.bed = m[1].slice(11, 16); } if (b > n.we) { n.we = b; n.wake = m[2].slice(11, 16); } } }
+    };
+    for (;;) { const { done, value } = await rd.read(); if (done) break; read += value.length; buf += dec.decode(value, { stream: true }); const parts = buf.split('\n'); buf = parts.pop(); parts.forEach(line); if (read - shown > 2e7) { shown = read; setMsg(Math.round(read / 1e6) + ' MB gelesen…'); } }
+    if (buf) line(buf);
+    const na = { ...act }; let ds = 0; Object.keys(steps).forEach(d => { const v = Math.max(...Object.values(steps[d])); if (v > 0) { na[d] = { ...(na[d] || {}), steps: Math.round(v) }; ds++; } });
+    const nl = { ...sl }; let ns = 0; Object.keys(nights).forEach(d => { const n = nights[d], h = (n.we - n.bs) / 36e5; if (!nl[d] && h >= 2 && h <= 16 && n.bed && n.wake) { nl[d] = { bed: n.bed, wake: n.wake }; ns++; } });
+    setAct(na); setSl(nl); setMsg(ds + ' Tage Schritte und ' + ns + ' Nächte importiert. Vorhandene Schlaf-Einträge bleiben unverändert.');
+  };
+  const samsung = async f => {
+    const lines = (await f.text()).split(/\r?\n/).filter(Boolean), hi = lines.findIndex((l, i) => i < 3 && /step_count/i.test(l));
+    if (hi < 0) return setMsg('Keine Schritte-Datei erkannt. Wähle die Datei „pedometer_day_summary“ (.csv).');
+    const sp = l => { const o = []; let c = '', q = false; for (const ch of l) { if (ch === '"') q = !q; else if (ch === ',' && !q) { o.push(c); c = ''; } else c += ch; } o.push(c); return o; };
+    const H = sp(lines[hi]).map(x => x.trim()), col = s => H.findIndex(h => h === s || h.endsWith('.' + s)), ci = col('day_time'), si = col('step_count'), di = col('distance');
+    if (ci < 0 || si < 0) return setMsg('Die Spalten day_time und step_count wurden nicht gefunden.');
+    const days = {}; lines.slice(hi + 1).forEach(l => { const r = sp(l), v = (r[ci] || '').trim(); const d = /^\d{12,}$/.test(v) ? new Date(+v + 43200000).toISOString().slice(0, 10) : /^\d{4}-\d\d-\d\d/.test(v) ? v.slice(0, 10) : null; const s = parseFloat(r[si]); if (d && s > 0 && (!days[d] || s > days[d].s)) days[d] = { s, m: di >= 0 ? parseFloat(r[di]) || 0 : 0 }; });
+    const na = { ...act }; Object.keys(days).forEach(d => { na[d] = { ...(na[d] || {}), steps: Math.round(days[d].s), ...(days[d].m > 0 ? { km: Math.round(days[d].m / 10) / 100 } : {}) }; });
+    setAct(na); setMsg(Object.keys(days).length + ' Tage Schritte importiert.');
+  };
+  return (<section className="card glass" style={{ marginBottom: 16 }}><h2>Health-Import</h2>
+    <p className="muted small" style={{ marginBottom: 10 }}>Apple Health und Samsung Health lassen sich von einer Webseite nicht live auslesen. Du exportierst deine Daten und wählst die Datei hier aus.</p>
+    <label className="fld"><span>Apple Health: export.xml (Schritte und Schlaf)</span><input type="file" accept=".xml,text/xml" disabled={busy} onChange={e => run(apple, e)} /></label>
+    <label className="fld" style={{ marginTop: 10 }}><span>Samsung Health: pedometer_day_summary-CSV (Schritte, Distanz)</span><input type="file" accept=".csv,text/csv,text/plain" disabled={busy} onChange={e => run(samsung, e)} /></label>
+    {msg && <p className="muted" role="status" style={{ marginTop: 8 }}>{msg}</p>}
+    <details style={{ marginTop: 10 }}><summary className="muted">So exportierst du</summary><p className="muted small"><b>Apple:</b> Health-App → Profilbild → „Alle Gesundheitsdaten exportieren“. Die ZIP-Datei in der Dateien-App entpacken und export.xml wählen.</p><p className="muted small"><b>Samsung:</b> Samsung Health → Einstellungen → „Persönliche Daten herunterladen“. ZIP entpacken und die CSV-Datei mit „pedometer_day_summary“ im Namen wählen.</p></details></section>);
+}
+function Placeholder({ item }) {
+  return <div className="card glass empty"><h1>{item.label}</h1><p>Dieser Bereich kommt in Phase {item.phase}.</p></div>;
+}
+function App() {
+  const [page, setPage] = useLocalStorage('th.page', 'dashboard');
+  useEffect(() => { const t = setInterval(() => { try { if (JSON.parse(localStorage.getItem('th.cloudauto') || 'true')) cloud.up(false); } catch (e) { /* ignorieren */ } }, 45000); return () => clearInterval(t); }, []);
+  const current = NAV.find(n => n.id === page) || NAV[0];
+  return (
+    <div className="shell">
+      <nav className="nav glass" aria-label="Hauptnavigation">
+        <div className="brand">{APP_NAME}</div>
+        {NAV.map(n => (
+          <button key={n.id} className={'nav-item' + (n.id === current.id ? ' active' : '')} onClick={() => setPage(n.id)}>
+            <span className="nav-icon">{n.icon}</span><span className="nav-label">{n.label}</span>
+          </button>))}
+      </nav>
+      <main className="main" key={current.id}>{current.id === 'dashboard' ? <DashHub /> : current.id === 'calendar' ? <Calendar /> : current.id === 'daily' ? <DailyCheck /> : current.id === 'plan' ? <PlanHub /> : current.id === 'tasks' ? <TasksHub /> : current.id === 'training' ? <TrainHub /> : current.id === 'profile' ? <ProfileHub /> : current.id === 'hof' ? <Board /> : current.id === 'brief' ? <Brief /> : current.id === 'sleep' ? <SleepHub /> : current.id === 'activity' ? <Activity /> : current.id === 'food' ? <Food /> : current.id === 'football' ? <Football /> : current.id === 'stats' ? <Stats /> : <Placeholder item={current} />}</main>
+    </div>);
+}
+// Einmalig: Schule (Mo–Fr, 07:50–12:55) mit den Fächern des Tages in den Tagesplan eintragen
+(function seedSchool() {
+  try {
+    if (localStorage.getItem('th.schoolSeed3')) return;
+    const days = [
+      ['G|Bar|117', 'E|Bar|117', 'B|Erh|Bio_119', 'D|Wab|117', 'M|Gru|117', 'Ph|Wez|Ph_120'],
+      ['D|Wab|117', 'D|Wab|117', 'E|Bar|117', 'F|Kri|117', 'M|Gru|117', 'M|Gru|117'],
+      ['M|Gru|117', 'PuG|Hau|117', 'Ev|Sne|206', 'G|Bar|117', 'Sm|Kle|.FW_li', 'Sm|Kle|.FW_li'],
+      ['D|Wab|117', 'Ev|Sne|206', 'F|Kri|117', 'Ph|Wez|Ph_122', 'E|Bar|117', 'PuG|Hau|117'],
+      ['E|Bar|117', 'B|Erh|Ph_120', 'F|Kri|117', 'F|Kri|117', 'C|Lau|Ch_111', 'C|Lau|Ch_111']];
+    const plan = JSON.parse(localStorage.getItem('th.plan') || '{}');
+    const T = [['07:50', '08:35'], ['08:35', '09:20'], ['09:40', '10:25'], ['10:25', '11:10'], ['11:25', '12:10'], ['12:10', '12:55']];
+    days.forEach((subj, i) => {
+      const list = (plan[i] || []).filter(x => !String(x.id).startsWith('school-'));
+      const lessons = subj.map((str, n) => { const [s, t, room] = str.split('|'); return { s, t, room, start: T[n][0], end: T[n][1] }; });
+      plan[i] = [{ id: 'school-' + i, title: 'Schule', cat: 'Schule / Arbeit', start: '07:50', end: '12:55', lessons }, ...list];
+    });
+    localStorage.setItem('th.plan', JSON.stringify(plan));
+    localStorage.setItem('th.schoolSeed3', '1');
+  } catch (e) { /* Speicher gesperrt */ }
+})();
+function AuthScreen({ onSkip }) {
+  const [mode, setMode] = useState('in'); const [email, setEmail] = useState(''); const [pw, setPw] = useState(''); const [msg, setMsg] = useState(''); const [busy, setBusy] = useState(false);
+  const go = async () => {
+    if (!email.includes('@') || pw.length < 8) return setMsg('Bitte eine g\u00fcltige E-Mail und ein Passwort mit mindestens 8 Zeichen eingeben.');
+    setBusy(true); setMsg('');
+    const r = mode === 'in' ? await sb.auth.signInWithPassword({ email, password: pw }) : await sb.auth.signUp({ email, password: pw, options: { emailRedirectTo: location.origin + location.pathname } });
+    setBusy(false);
+    if (r.error) return setMsg(r.error.message === 'Invalid login credentials' ? 'E-Mail oder Passwort stimmt nicht.' : r.error.message);
+    if (mode === 'up' && !r.data.session) setMsg('Fast geschafft: Best\u00e4tige die E-Mail, die wir dir geschickt haben, und melde dich dann an.');
+  };
+  const reset = async () => {
+    if (!email.includes('@')) return setMsg('Gib oben deine E-Mail ein.');
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+    setMsg(error ? error.message : 'Wir haben dir eine E-Mail zum Zur\u00fccksetzen geschickt.');
+  };
+  return (<div className="auth"><div className="card glass" style={{ maxWidth: 420, width: '100%' }}>
+    <div className="brand" style={{ fontSize: '1.6rem', padding: 0 }}>TrainingHub</div>
+    <p className="muted" style={{ margin: '6px 0 16px' }}>{mode === 'in' ? 'Melde dich an, damit deine Daten auf allen Ger\u00e4ten gleich sind.' : 'Erstelle dein Konto mit E-Mail und Passwort.'}</p>
+    <div className="form"><input type="email" autoComplete="email" placeholder="E-Mail" value={email} onChange={e => setEmail(e.target.value)} />
+      <input type="password" autoComplete={mode === 'in' ? 'current-password' : 'new-password'} placeholder="Passwort (mind. 8 Zeichen)" value={pw} onChange={e => setPw(e.target.value)} onKeyDown={e => e.key === 'Enter' && go()} />
+      {msg && <p className="err" role="alert">{msg}</p>}
+      <button className="btn" disabled={busy} onClick={go}>{mode === 'in' ? 'Anmelden' : 'Konto erstellen'}</button>
+      <button className="btn ghost" onClick={() => { setMode(mode === 'in' ? 'up' : 'in'); setMsg(''); }}>{mode === 'in' ? 'Neu hier? Konto erstellen' : 'Ich habe schon ein Konto'}</button>
+      {mode === 'in' && <button className="x" onClick={reset} style={{ width: 'auto', padding: '0 8px' }}>Passwort vergessen?</button>}
+      <button className="x" onClick={onSkip} style={{ width: 'auto', padding: '0 8px' }}>Ohne Konto fortfahren (nur auf diesem Ger\u00e4t)</button></div></div></div>);
+}
+function NewPw({ onDone }) {
+  const [pw, setPw] = useState(''); const [msg, setMsg] = useState('');
+  const save = async () => { if (pw.length < 8) return setMsg('Mindestens 8 Zeichen.'); const { error } = await sb.auth.updateUser({ password: pw }); if (error) return setMsg(error.message); onDone(); };
+  return (<div className="auth"><div className="card glass" style={{ maxWidth: 420, width: '100%' }}><h2>Neues Passwort</h2><div className="form"><input type="password" autoComplete="new-password" placeholder="Neues Passwort" value={pw} onChange={e => setPw(e.target.value)} />{msg && <p className="err" role="alert">{msg}</p>}<button className="btn" onClick={save}>Speichern</button></div></div></div>);
+}
+function Root() {
+  const [ready, setReady] = useState(!sb); const [user, setUser] = useState(null); const [local, setLocal] = useState(false); const [recovery, setRecovery] = useState(false);
+  useEffect(() => {
+    if (!sb) return;
+    sb.auth.getSession().then(({ data }) => { cloud.user = data.session ? data.session.user : null; setUser(cloud.user); setReady(true); });
+    const { data: sub } = sb.auth.onAuthStateChange((ev, session) => { cloud.user = session ? session.user : null; setUser(cloud.user); if (ev === 'PASSWORD_RECOVERY') setRecovery(true); });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+  // Neues Ger\u00e4t: nach dem Anmelden Cloud-Daten laden, wenn hier noch keine eigenen Daten liegen
+  useEffect(() => {
+    if (!user) return;
+    const mine = ['th.events', 'th.tasks', 'th.gym', 'th.act', 'th.checkdone', 'th.mlog', 'th.sleep', 'th.profile'];
+    if (!mine.some(k => localStorage.getItem(k) !== null)) cloud.down();
+  }, [user && user.id]);
+  if (!ready) return <div className="auth"><p className="muted">Lade\u2026</p></div>;
+  if (recovery && user) return <NewPw onDone={() => setRecovery(false)} />;
+  if (sb && !user && !local) return <AuthScreen onSkip={() => setLocal(true)} />;
+  return <App />;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
+</script></body></html>
